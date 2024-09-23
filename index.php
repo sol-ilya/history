@@ -62,7 +62,6 @@ if ($quantity > 0) {
     $order = [];
 }
 
-// Функция для алгоритма зачета (без изменений)
 function calculateOrderExam($students, $day) {
     $quantity = count($students);
     $index = ($day - 1) % $quantity;
@@ -74,9 +73,9 @@ function calculateOrderExam($students, $day) {
                 $order[] = $students[$index]['surname'];
             }
             $visited[] = $index;
+            $index = ($index + $day) % $quantity;
         }
-        $index = ($index + $day) % $quantity;
-        if (in_array($index, $visited)) {
+        else {
             $index = ($index + 1) % $quantity;
         }
     }
