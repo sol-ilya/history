@@ -72,7 +72,7 @@ $students = readStudents($pdo);
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="admin-container">
+    <div class="container">
         <h1>Консоль администратора</h1>
         <?php if (isset($message)): ?>
             <p class="success"><?php echo $message; ?></p>
@@ -114,5 +114,8 @@ $students = readStudents($pdo);
             <input type="submit" value="Сохранить">
         </form>
     </div>
+    <footer>
+        &copy; <?php echo date('Y'); ?> Школьный портал
+    </footer>
 </body>
 </html>

@@ -1,26 +1,56 @@
 /* style.css */
 
-/* Основной стиль страницы */
-body {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    background-color: #f4f7fa;
+/* Определение CSS-переменных для цветов и шрифтов */
+:root {
+    --font-family: 'Helvetica Neue', Arial, sans-serif;
+    --color-bg: #f4f7fa;
+    --color-bg-content: #fff;
+    --color-text: #333;
+    --color-text-secondary: #555;
+    --color-primary: #28a745;
+    --color-primary-hover: #209a3c;
+    --color-border: #ccc;
+    --color-border-light: #ddd;
+    --color-success: green;
+    --color-calendar-bg: #fafafa;
+    --color-calendar-header: #f0f0f0;
+    --color-calendar-weekdays: #f7f7f7;
+    --color-calendar-today-bg: #cce5ff;
+    --color-calendar-today-text: #0056b3;
+    --color-calendar-selected-bg: #0056b3;
+    --color-calendar-selected-text: #fff;
+    --color-calendar-lesson-day-bg: #a5d6a7;
+    --color-calendar-lesson-day-text: #2e7d32;
+    --color-calendar-lesson-day-hover-bg: #81c784;
+    --color-calendar-lesson-day-hover-text: #1b5e20;
+}
+
+/* Сброс отступов и полей */
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+}
+
+/* Основные стили */
+body {
+    font-family: var(--font-family);
+    background-color: var(--color-bg);
+    color: var(--color-text);
 }
 
 .container {
     width: 80%;
     max-width: 800px;
     margin: 40px auto;
-    background: #fff;
+    background: var(--color-bg-content);
     padding: 30px 40px;
     border-radius: 12px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Заголовки */
 h1 {
-    color: #333;
+    color: var(--color-text);
     text-align: center;
     font-size: 28px;
     margin-bottom: 20px;
@@ -36,41 +66,42 @@ label {
     display: block;
     font-weight: bold;
     margin-bottom: 5px;
-    color: #555;
+    color: var(--color-text-secondary);
 }
 
 .form-group {
     margin-bottom: 20px;
-    text-align: center;
 }
 
 input[type="text"],
-select {
+select,
+input[type="number"] {
     padding: 10px 12px;
-    width: 90%;
+    width: 100%;
     max-width: 300px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--color-border);
     border-radius: 4px;
-    box-sizing: border-box;
-    margin-bottom: 15px;
+    margin: 0 auto 15px auto;
     display: block;
-    margin-left: auto;
-    margin-right: auto;
 }
 
-input[type="submit"] {
+input[type="submit"],
+button {
     padding: 12px 20px;
-    background: #28a745;
+    background: var(--color-primary);
     border: none;
     color: #fff;
     border-radius: 4px;
     cursor: pointer;
-    margin-top: 20px;
+    margin: 20px auto 0 auto;
     font-size: 16px;
+    transition: background 0.3s ease;
+    display: block;
 }
 
-input[type="submit"]:hover {
-    background: #209a3c;
+input[type="submit"]:hover,
+button:hover {
+    background: var(--color-primary-hover);
 }
 
 /* Список учеников */
@@ -81,46 +112,43 @@ ol {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
     list-style-position: inside;
     font-size: 18px;
-    padding-left: 20px;
 }
 
 ol li {
     padding: 10px 0;
-    border-bottom: 1px solid #ddd;
-    font-size: 18px;
+    border-bottom: 1px solid var(--color-border-light);
 }
 
 ol li:last-child {
     border-bottom: none;
 }
 
-/* Успешное сообщение */
+/* Сообщения */
 .success {
-    color: green;
+    color: var(--color-success);
     font-size: 16px;
     text-align: center;
     margin-bottom: 15px;
 }
 
-/* Легенда для календаря */
+/* Легенда календаря */
 .legend {
     margin-top: 20px;
     text-align: center;
     font-size: 14px;
-    color: #555;
+    color: var(--color-text-secondary);
 }
 
 .legend .lesson-day {
     width: 12px;
     height: 12px;
-    background-color: #a5d6a7;
+    background-color: var(--color-calendar-lesson-day-bg);
     display: inline-block;
     margin-right: 5px;
     border-radius: 50%;
 }
 
-/* Оформление календаря flatpickr */
-
+/* Стили flatpickr */
 .flatpickr-wrapper {
     width: 90%;
     max-width: 300px;
@@ -128,16 +156,16 @@ ol li:last-child {
 }
 
 .flatpickr-calendar {
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--color-border);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     border-radius: 12px;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    background-color: #fafafa;
+    font-family: var(--font-family);
+    background-color: var(--color-calendar-bg);
 }
 
 .flatpickr-months {
-    background-color: #f0f0f0;
-    color: #333;
+    background-color: var(--color-calendar-header);
+    color: var(--color-text);
     border-radius: 12px 12px 0 0;
     padding: 10px;
     display: flex;
@@ -148,30 +176,31 @@ ol li:last-child {
 .flatpickr-month {
     font-size: 18px;
     font-weight: 600;
-    text-align: center;
     flex-grow: 1;
+    text-align: center;
 }
 
-.flatpickr-prev-month, .flatpickr-next-month {
+.flatpickr-prev-month,
+.flatpickr-next-month {
     font-size: 22px;
     padding: 10px;
-    color: #666;
+    color: var(--color-text-secondary);
     cursor: pointer;
     transition: color 0.3s ease;
 }
 
-.flatpickr-prev-month:hover, .flatpickr-next-month:hover {
-    color: #333;
+.flatpickr-prev-month:hover,
+.flatpickr-next-month:hover {
+    color: var(--color-text);
 }
 
 .flatpickr-weekdays {
-    background-color: #f7f7f7;
+    background-color: var(--color-calendar-weekdays);
     padding: 10px 0;
-    text-align: center;
     font-weight: bold;
     font-size: 14px;
-    color: #666;
-    border-bottom: 1px solid #e0e0e0;
+    color: var(--color-text-secondary);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .flatpickr-days {
@@ -184,7 +213,7 @@ ol li:last-child {
     line-height: 40px;
     margin: 5px;
     font-size: 14px;
-    color: #555;
+    color: var(--color-text-secondary);
     text-align: center;
     border-radius: 8px;
     transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
@@ -193,41 +222,38 @@ ol li:last-child {
 
 .flatpickr-day:hover {
     background-color: #f0f0f0;
-    color: #333;
+    color: var(--color-text);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
-/* Оформление текущей даты */
 .flatpickr-day.today {
-    background-color: #cce5ff !important;
-    color: #0056b3 !important;
+    background-color: var(--color-calendar-today-bg) !important;
+    color: var(--color-calendar-today-text) !important;
     border-radius: 50%;
     font-weight: bold;
 }
 
 .flatpickr-day.selected {
-    background-color: #0056b3 !important;
-    color: #fff !important;
+    background-color: var(--color-calendar-selected-bg) !important;
+    color: var(--color-calendar-selected-text) !important;
     border-radius: 50%;
     font-weight: bold;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Оформление дней уроков */
 .flatpickr-day.lesson-day {
-    background-color: #a5d6a7 !important;
-    color: #2e7d32 !important;
+    background-color: var(--color-calendar-lesson-day-bg) !important;
+    color: var(--color-calendar-lesson-day-text) !important;
     border-radius: 50%;
     font-weight: bold;
 }
 
 .flatpickr-day.lesson-day:hover,
 .flatpickr-day.lesson-day.selected {
-    background-color: #81c784 !important;
-    color: #1b5e20 !important;
+    background-color: var(--color-calendar-lesson-day-hover-bg) !important;
+    color: var(--color-calendar-lesson-day-hover-text) !important;
 }
 
-/* Недоступные для выбора даты */
 .flatpickr-day.disabled {
     color: #ccc !important;
     background-color: #f9f9f9 !important;
@@ -238,96 +264,72 @@ ol li:last-child {
 footer {
     text-align: center;
     padding: 20px;
-    background: #f4f7fa;
+    background: var(--color-bg);
     position: fixed;
     width: 100%;
     bottom: 0;
-    color: #555;
+    color: var(--color-text-secondary);
 }
 
-/* Админка (admin.php) */
-
-.admin-container {
-    width: 80%;
-    max-width: 800px;
-    margin: 40px auto;
-    background: #fff;
-    padding: 30px 40px;
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-}
-
-.admin-container h1 {
-    color: #333;
-    text-align: center;
-    font-size: 28px;
-    margin-bottom: 20px;
-}
-
-.admin-container form {
-    margin-bottom: 30px;
-}
-
-.admin-container table {
+/* Стили для таблицы в admin.php */
+table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
 }
 
-.admin-container table th,
-.admin-container table td {
+table th,
+table td {
     padding: 12px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--color-border-light);
     text-align: center;
 }
 
-.admin-container table th {
-    background-color: #f7f7f7;
-    color: #333;
+table th {
+    background-color: var(--color-calendar-weekdays);
+    color: var(--color-text);
     font-weight: bold;
 }
 
-.admin-container table tr:nth-child(even) {
+table tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
-.admin-container table tr:hover {
+table tr:hover {
     background-color: #f1f1f1;
 }
 
-.admin-container input[type="text"] {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.admin-container input[type="checkbox"] {
+input[type="checkbox"] {
     transform: scale(1.2);
 }
 
-.admin-container input[type="number"] {
-    padding: 8px;
-    width: 80px;
-}
+/* Адаптивность */
+@media (max-width: 600px) {
+    .container {
+        width: 95%;
+        padding: 20px;
+    }
 
-.admin-container input[type="submit"] {
-    padding: 10px 20px;
-    background: #28a745;
-    border: none;
-    color: #fff;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-top: 20px;
-}
+    h1 {
+        font-size: 24px;
+    }
 
-.admin-container input[type="submit"]:hover {
-    background: #209a3c;
-}
+    input[type="text"],
+    select,
+    input[type="submit"],
+    button {
+        width: 100%;
+    }
 
-.admin-container .success {
-    color: green;
-    font-size: 16px;
-    text-align: center;
-    margin-bottom: 15px;
+    .flatpickr-wrapper {
+        width: 100%;
+    }
+
+    .flatpickr-day {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        margin: 2px;
+        font-size: 12px;
+    }
 }
