@@ -2,20 +2,15 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// Подключение к базе данных
+// Подключение к базе данных и функции
 require_once 'db_connect.php';
+require_once 'functions.php';
 
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (PDOException $e) {
     echo 'Подключение не удалось: ' . $e->getMessage();
     exit();
-}
-
-// Функция для чтения данных об учениках из базы данных
-function readStudents($pdo) {
-    $stmt = $pdo->query('SELECT * FROM students');
-    return $stmt->fetchAll();
 }
 
 // Функция для сохранения данных об учениках в базу данных

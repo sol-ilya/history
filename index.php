@@ -2,36 +2,15 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// Подключение к базе данных
+// Подключение к базе данных и функции
 require_once 'db_connect.php';
+require_once 'functions.php';
 
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (PDOException $e) {
     echo 'Подключение не удалось: ' . $e->getMessage();
     exit();
-}
-
-// Определяем дни уроков (например, вторник)
-$lessonDays = [2]; // 2 - вторник (0 - воскресенье, ..., 6 - суббота)
-
-// Функция для получения следующей даты урока
-function getNextLessonDate($lessonDays) {
-    $today = strtotime('today');
-    $currentDay = date('w', $today); // День недели сегодня (0 - воскресенье)
-    foreach (range(0, 6) as $i) {
-        $nextDay = ($currentDay + $i) % 7;
-        if (in_array($nextDay, $lessonDays)) {
-            return date('Y-m-d', strtotime("+$i days", $today));
-        }
-    }
-    return date('Y-m-d', $today); // Если что-то пойдет не так, вернем сегодняшнюю дату
-}
-
-// Функция для чтения данных об учениках из базы данных
-function readStudents($pdo) {
-    $stmt = $pdo->query('SELECT * FROM students');
-    return $stmt->fetchAll();
 }
 
 // Определяем выбранную дату и алгоритм
@@ -60,48 +39,6 @@ if ($quantity > 0) {
 } else {
     echo "<p>Не удалось вычислить порядок, так как список учеников пуст.</p>";
     $order = [];
-}
-
-function calculateOrderExam($students, $day) {
-    $quantity = count($students);
-    $index = ($day - 1) % $quantity;
-    $order = [];
-    $visited = [];
-    while (count($visited) < $quantity) {
-        if (!in_array($index, $visited)) {
-            if ($students[$index]['is_present_now']) {
-                $order[] = $students[$index]['surname'];
-            }
-            $visited[] = $index;
-            $index = ($index + $day) % $quantity;
-        }
-        else {
-            $index = ($index + 1) % $quantity;
-        }
-    }
-    return $order;
-}
-
-// Обновленная функция для алгоритма работы на уроке
-function calculateOrderLesson($students, $day, $n = 10) {
-    $quantity = count($students);
-    $index = ($day - 1) % $quantity;
-    $order = [];
-    $selectedIndices = [];
-    while (count($order) < $n && count($selectedIndices) < $quantity) {
-        $student = $students[$index];
-        if (!in_array($index, $selectedIndices)) {
-            if ($student['is_present_now'] && $student['was_present_before'] && $student['marks'] == 0)
-                $order[] = $student['surname'];
-            $selectedIndices[] = $index;
-            // Следующий индекс вычисляется как (index_n + day) % quantity
-            $index = ($index + $day) % $quantity;
-        } else {
-            // Если индекс уже был выбран, пропускаем к следующему
-            $index = ($index + 1) % $quantity;
-        }
-    }
-    return $order;
 }
 ?>
 <!DOCTYPE html>
