@@ -1,10 +1,18 @@
 <?php
+session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 // Подключение к базе данных и функции
 require_once 'db_connect.php';
 require_once 'functions.php';
+
+// Проверка, авторизован ли пользователь и является ли он админом
+if (!isLoggedIn() || !isAdmin()) {
+    header('HTTP/1.1 403 Forbidden');
+    echo 'Доступ запрещен.';
+    exit();
+}
 
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
@@ -18,15 +26,21 @@ function saveStudents($pdo, $students) {
     foreach ($students as $student) {
         if (isset($student['id'])) {
             // Обновляем данные ученика
-            $stmt = $pdo->prepare('UPDATE students SET surname = ?, was_present_before = ?, is_present_now = ?, marks = ? WHERE id = ?');
-            $stmt->execute([$student['surname'], (int)$student['wasPresentBefore'], (int)$student['isPresentNow'], $student['marks'], $student['id']]);
+            $stmt = $pdo->prepare('UPDATE students SET name = ?, was_present_before = ?, is_present_now = ?, marks = ? WHERE id = ?');
+            $stmt->execute([
+                $student['name'],
+                $student['wasPresentBefore'] ? 1 : 0,
+                $student['isPresentNow'] ? 1 : 0,
+                (int)$student['marks'],
+                $student['id']
+            ]);
         }
     }
 }
 
 // Функция для переноса данных к следующему уроку
 function moveToNextLesson($pdo) {
-    // Переносим данные: isPresentNow -> wasPresentBefore, isPresentNow устанавливаем в true
+    // Переносим данные: isPresentNow -> was_present_before, is_present_now устанавливаем в true
     $stmt = $pdo->prepare('UPDATE students SET was_present_before = is_present_now, is_present_now = 1');
     $stmt->execute();
 }
@@ -40,19 +54,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         // Обновление данных учеников через форму
         $updatedStudents = [];
-        foreach ($_POST['students'] as $index => $data) {
-            if (isset($data['id'])) {
-                $updatedStudents[] = [
-                    'id' => $data['id'],
-                    'surname' => $data['surname'],
-                    'wasPresentBefore' => isset($data['wasPresentBefore']) ? true : false,
-                    'isPresentNow' => isset($data['isPresentNow']) ? true : false,
-                    'marks' => $data['marks']
-                ];
+        if (isset($_POST['students']) && is_array($_POST['students'])) {
+            foreach ($_POST['students'] as $index => $data) {
+                if (isset($data['id'])) {
+                    $updatedStudents[] = [
+                        'id' => $data['id'],
+                        'name' => trim($data['name']),
+                        'wasPresentBefore' => isset($data['wasPresentBefore']),
+                        'isPresentNow' => isset($data['isPresentNow']),
+                        'marks' => (int)$data['marks']
+                    ];
+                }
             }
         }
-        saveStudents($pdo, $updatedStudents);
-        $message = "Данные успешно сохранены.";
+        if (!empty($updatedStudents)) {
+            saveStudents($pdo, $updatedStudents);
+            $message = "Данные успешно сохранены.";
+        } else {
+            $message = "Нет данных для сохранения.";
+        }
     }
 }
 
@@ -66,15 +86,17 @@ $students = readStudents($pdo);
     <title>Консоль администратора</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+    <?php include 'header.php'; ?>
     <div class="container">
         <h1>Консоль администратора</h1>
         <?php if (isset($message)): ?>
-            <p class="success"><?php echo $message; ?></p>
+            <p class="success"><?php echo htmlspecialchars($message); ?></p>
         <?php endif; ?>
 
         <!-- Кнопка для переноса данных к следующему уроку -->
-        <form method="post">
+        <form method="post" style="margin-bottom: 20px;">
             <input type="submit" name="move_to_next_lesson" value="Перенести данные к следующему уроку">
         </form>
 
@@ -92,7 +114,7 @@ $students = readStudents($pdo);
                         <td>
                             <!-- Добавляем скрытое поле ID -->
                             <input type="hidden" name="students[<?php echo $index; ?>][id]" value="<?php echo $student['id']; ?>">
-                            <input type="text" name="students[<?php echo $index; ?>][surname]" value="<?php echo htmlspecialchars($student['surname']); ?>">
+                            <input type="text" name="students[<?php echo $index; ?>][name]" value="<?php echo htmlspecialchars($student['name']); ?>" required>
                         </td>
                         <td>
                             <input type="checkbox" name="students[<?php echo $index; ?>][wasPresentBefore]" <?php if ($student['was_present_before']) echo 'checked'; ?>>

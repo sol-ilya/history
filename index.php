@@ -1,4 +1,5 @@
 <?php
+session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
@@ -22,6 +23,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $algorithm = 'lesson';
 }
 
+// Проверка корректности даты
+if (!validateDate($selectedDate)) {
+    $selectedDate = getNextLessonDate($lessonDays);
+}
+
 // Получаем день месяца из выбранной даты
 $day = (int)date('d', strtotime($selectedDate));
 
@@ -29,7 +35,9 @@ $day = (int)date('d', strtotime($selectedDate));
 $students = readStudents($pdo);
 $quantity = count($students);
 
-// Вычисляем порядок в зависимости от выбранного алгоритма
+// Инициализация переменной для сообщения
+$user_message = '';
+
 if ($quantity > 0) {
     if ($algorithm == 'exam') {
         $order = calculateOrderExam($students, $day);
@@ -39,6 +47,15 @@ if ($quantity > 0) {
 } else {
     echo "<p>Не удалось вычислить порядок, так как список учеников пуст.</p>";
     $order = [];
+}
+
+// Проверка, находится ли пользователь в списке
+if (isLoggedIn() && $algorithm == 'lesson') {
+    if (in_array($_SESSION['user_id'], array_column($order, 'user_id'))){
+        $user_message = '<p class="user-alert" style="color: red; font-weight: bold; text-align: center; margin-top: 20px;">Возможно Вас спросят.</p>';
+    } else {
+        $user_message = '<p class="user-alert" style="color: green; font-weight: bold; text-align: center; margin-top: 20px;">Скорее всего Вас не спросят.</p>';
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -50,29 +67,42 @@ if ($quantity > 0) {
     <!-- Подключаем стили flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
+
 <body>
+    <?php include 'header.php'; ?>
     <div class="container">
         <h1>Порядок ответов учеников</h1>
         <form method="post">
             <div class="form-group">
                 <label for="date">Выберите дату урока:</label>
-                <input type="text" id="date" name="date" value="<?php echo $selectedDate; ?>">
+                <input type="text" id="date" name="date" value="<?php echo htmlspecialchars($selectedDate); ?>" required>
             </div>
             <div class="form-group">
                 <label for="algorithm">Выберите алгоритм:</label>
                 <select id="algorithm" name="algorithm">
-                <option value="lesson" <?php if ($algorithm == 'lesson') echo 'selected'; ?>>Работа на уроке</option>
-                <option value="exam" <?php if ($algorithm == 'exam') echo 'selected'; ?>>Зачет</option>     
+                    <option value="lesson" <?php if ($algorithm == 'lesson') echo 'selected'; ?>>Работа на уроке</option>
+                    <option value="exam" <?php if ($algorithm == 'exam') echo 'selected'; ?>>Зачет</option>     
                 </select>
             </div>
             <input type="submit" value="Вычислить порядок">
         </form>
 
+        <?php if (isset($user_message)): ?>
+            <?php echo $user_message; ?>
+        <?php endif; ?>
+
         <?php if (!empty($order)): ?>
             <h2>Порядок ответов на дату <?php echo date('d.m.Y', strtotime($selectedDate)); ?>:</h2>
             <ol>
-                <?php foreach ($order as $surname): ?>
-                    <li><?php echo htmlspecialchars($surname); ?></li>
+                <?php foreach ($order as $student): ?>
+                    <li><?php 
+                        echo htmlspecialchars($student['name']);
+                        if (isLoggedIn() && $_SESSION['user_id'] == $student['user_id'])
+                            echo ' (Вы)';
+                        elseif ($student['nickname'])
+                            echo ' ('. htmlspecialchars($student['nickname']) . ')';
+                    
+                    ?></li>
                 <?php endforeach; ?>
             </ol>
         <?php else: ?>
@@ -97,7 +127,7 @@ if ($quantity > 0) {
         flatpickr("#date", {
             "locale": "ru",
             "dateFormat": "Y-m-d",
-            "defaultDate": "<?php echo $selectedDate; ?>",
+            "defaultDate": "<?php echo htmlspecialchars($selectedDate); ?>",
             "disable": [
                 function(date) {
                     // Отключаем даты, которые не являются днями уроков

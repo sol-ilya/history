@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS `students`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `students` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `surname` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
   `was_present_before` tinyint(1) NOT NULL DEFAULT 0,
   `is_present_now` tinyint(1) NOT NULL DEFAULT 0,
   `marks` int(11) NOT NULL DEFAULT 0,
@@ -40,19 +40,19 @@ CREATE TABLE `students` (
 LOCK TABLES `students` WRITE;
 /*!40000 ALTER TABLE `students` DISABLE KEYS */;
 INSERT INTO `students` VALUES
-(1,'Агасиев Александр',1,1,0),
-(2,'Базеев Иван',1,1,0),
+(1,'Агасиев Александр',1,1,1),
+(2,'Базеев Иван',1,1,1),
 (3,'Березина Серафима',1,1,1),
 (4,'Волков Николай',0,1,0),
 (5,'Воротова Николь',1,1,0),
 (6,'Выскребенцева Кристина',1,1,0),
-(7,'Галяева Виктория',0,1,0),
+(7,'Галяева Виктория',1,1,0),
 (8,'Гнездилов Денис',1,1,0),
 (9,'Гудович Адам',1,1,1),
 (10,'Заворочаев Лев',1,1,1),
 (11,'Калинин Тимофей',1,1,0),
 (12,'Карелина Александра',1,1,0),
-(13,'Кастрикина Марина',0,1,0),
+(13,'Кастрикина Марина',1,1,0),
 (14,'Кобзев Иван',1,0,0),
 (15,'Кочетов Вячеслав',0,0,0),
 (16,'Остриковская Муза',1,1,0),
@@ -66,6 +66,30 @@ INSERT INTO `students` VALUES
 (24,'Токарева Варвара',1,1,0);
 /*!40000 ALTER TABLE `students` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `nickname` varchar(50) DEFAULT NULL,
+  `telegram` varchar(50) DEFAULT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `is_admin` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `student_unique` (`student_id`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -76,4 +100,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2024-09-27  1:20:20
+-- Dump completed on 2024-09-29 13:23:42

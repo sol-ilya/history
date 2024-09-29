@@ -11,7 +11,10 @@
     --color-primary-hover: #209a3c;
     --color-border: #ccc;
     --color-border-light: #ddd;
-    --color-success: green;
+    --color-success: #d4edda;
+    --color-error: #dc3545;
+    --color-warning: #ffc107;
+    --color-info: #17a2b8;
     --color-calendar-bg: #fafafa;
     --color-calendar-header: #f0f0f0;
     --color-calendar-weekdays: #f7f7f7;
@@ -39,20 +42,152 @@ body {
     color: var(--color-text);
 }
 
-.container {
-    width: 80%;
-    max-width: 800px;
-    margin: 40px auto;
-    background: var(--color-bg-content);
-    padding: 30px 40px;
-    border-radius: 12px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+/* Шапка */
+header {
+    background-color: var(--color-primary);
+    color: #fff;
+    padding: 10px 20px;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-h1 {
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.logo a:hover {
+    text-decoration: underline;
+}
+
+.user-menu {
+    position: relative;
+}
+
+.user-menu a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    margin-left: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.user-icon {
+    cursor: pointer;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+}
+
+.user-icon i {
+    color: #fff;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: var(--color-bg-content);
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    border-radius: 4px;
+    z-index: 1;
+}
+
+.dropdown-content a {
     color: var(--color-text);
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: var(--color-border-light);
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Навигация (гамбургер-меню) */
+.navigation {
+    position: relative;
+}
+
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+.nav-links li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.nav-links li a:hover {
+    text-decoration: underline;
+}
+
+/* Сообщение пользователю */
+.user-alert {
+    color: red;
+    font-weight: bold;
     text-align: center;
-    font-size: 28px;
+    margin-top: 20px;
+}
+
+/* Сообщения об ошибках */
+.errors {
+    background-color: #ffe6e6;
+    border: 1px solid var(--color-error);
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.errors ul {
+    list-style-type: none;
+}
+
+.errors li {
+    color: var(--color-error);
+}
+
+/* Сообщения об успехе */
+.success {
+    background-color: var(--color-success);
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    padding: 10px;
+    border-radius: 4px;
     margin-bottom: 20px;
 }
 
@@ -71,14 +206,19 @@ label {
 
 .form-group {
     margin-bottom: 20px;
+    text-align: left;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 input[type="text"],
+input[type="password"],
 select,
 input[type="number"] {
     padding: 10px 12px;
     width: 100%;
-    max-width: 300px;
+    max-width: 100%;
     border: 1px solid var(--color-border);
     border-radius: 4px;
     margin: 0 auto 15px auto;
@@ -121,14 +261,6 @@ ol li {
 
 ol li:last-child {
     border-bottom: none;
-}
-
-/* Сообщения */
-.success {
-    color: var(--color-success);
-    font-size: 16px;
-    text-align: center;
-    margin-bottom: 15px;
 }
 
 /* Легенда календаря */
@@ -304,25 +436,56 @@ input[type="checkbox"] {
 }
 
 /* Адаптивность */
+@media (max-width: 768px) {
+    .navigation {
+        position: relative;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        background-color: var(--color-primary);
+        position: absolute;
+        top: 50px;
+        right: 0;
+        width: 200px;
+        padding: 10px 0;
+        border-radius: 4px;
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .nav-links li {
+        padding: 10px 20px;
+    }
+
+    .user-menu {
+        display: none;
+    }
+}
+
 @media (max-width: 600px) {
-    .container {
-        width: 95%;
-        padding: 20px;
+    .header-container {
+        flex-direction: column;
+        align-items: flex-start;
     }
 
-    h1 {
-        font-size: 24px;
+    .user-menu {
+        margin-top: 10px;
     }
 
-    input[type="text"],
-    select,
-    input[type="submit"],
-    button {
-        width: 100%;
+    .user-menu a {
+        font-size: 16px;
     }
 
-    .flatpickr-wrapper {
-        width: 100%;
+    .logo a {
+        font-size: 20px;
     }
 
     .flatpickr-day {
@@ -332,4 +495,189 @@ input[type="checkbox"] {
         margin: 2px;
         font-size: 12px;
     }
+
+    /* Центрирование форм и элементов */
+    form {
+        width: 100%;
+        padding: 0 10px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    select,
+    input[type="number"] {
+        max-width: 100%;
+    }
+
+    table th,
+    table td {
+        padding: 8px;
+    }
+
+    /* Улучшение мобильного меню */
+    .nav-links {
+        width: 100%;
+    }
+
+    .profile-section {
+        padding: 10px;
+    }
+
+    .profile-info p {
+        font-size: 16px;
+    }
+
+    .profile-form {
+        width: 100%;
+    }
+
+    .profile-form .form-group {
+        margin-bottom: 15px;
+    }
+}
+
+/* Дополнительные стили */
+
+/* Горизонтальное центрирование контейнера */
+.container {
+    width: 80%;
+    max-width: 800px;
+    margin: 80px auto 60px auto; /* Увеличен верхний отступ для учета фиксированной шапки */
+    background: var(--color-bg-content);
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Заголовки */
+h1 {
+    color: var(--color-text);
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: var(--color-text);
+    font-size: 22px;
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+/* Кнопки и ссылки */
+a {
+    color: var(--color-primary);
+}
+
+a:hover {
+    color: var(--color-primary-hover);
+}
+
+/* Иконки Font Awesome */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+/* Мобильное меню */
+@media (max-width: 768px) {
+    .menu-toggle.active + .nav-links {
+        display: flex;
+    }
+}
+
+/* Прокрутка для выпадающего меню */
+.dropdown-content {
+    overflow-y: auto;
+    max-height: 300px;
+}
+
+/* Стили для кнопки меню */
+.menu-toggle {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Стили для ошибок и уведомлений */
+.errors ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.errors li {
+    margin-bottom: 5px;
+}
+
+/* Стили для профиля пользователя */
+.profile-section {
+    margin-bottom: 30px;
+}
+
+.profile-info p {
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.profile-form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.profile-form .form-group label {
+    font-size: 16px;
+}
+
+.profile-form input[type="text"],
+.profile-form input[type="password"],
+.profile-form select,
+.profile-form input[type="number"] {
+    font-size: 16px;
+}
+
+.profile-form input[type="submit"] {
+    width: 100%;
+    max-width: none;
+}
+
+/* Форма для изменения пароля */
+.profile-section form {
+    border: 1px solid var(--color-border-light);
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.profile-section form .form-group p {
+    font-size: 16px;
+    color: var(--color-text);
+}
+
+/* Стили для полей ввода в профиле */
+.profile-form input[type="text"],
+.profile-form input[type="password"],
+.profile-form select,
+.profile-form input[type="number"] {
+    padding: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+/* Стили для кнопок в профиле */
+.profile-form input[type="submit"] {
+    background-color: var(--color-primary);
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 16px;
+}
+
+.profile-form input[type="submit"]:hover {
+    background-color: var(--color-primary-hover);
 }

@@ -23,10 +23,26 @@ function validateDate($date, $format = 'Y-m-d') {
 
 // Функция для чтения данных об учениках из базы данных
 function readStudents($pdo) {
-    $stmt = $pdo->query('SELECT * FROM students');
+    $stmt = $pdo->query('SELECT s.*, u.id AS user_id, u.nickname FROM students s LEFT JOIN users u ON s.id=u.student_id');
     return $stmt->fetchAll();
 }
 
+// Функция для проверки, авторизован ли пользователь
+function isLoggedIn() {
+    return isset($_SESSION['user_id']);
+}
+
+// Функция для проверки, является ли пользователь админом
+function isAdmin() {
+    return isset($_SESSION['is_admin']) && $_SESSION['is_admin'];
+}
+
+// Функция для безопасного вывода данных
+function e($string) {
+    return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+}
+
+// Остальные функции (calculateOrderExam, calculateOrderLesson) остаются без изменений
 function calculateOrderExam($students, $day) {
     $quantity = count($students);
     $index = ($day - 1) % $quantity;
@@ -35,7 +51,7 @@ function calculateOrderExam($students, $day) {
     while (count($visited) < $quantity) {
         if (!in_array($index, $visited)) {
             if ($students[$index]['is_present_now']) {
-                $order[] = $students[$index]['surname'];
+                $order[] = $students[$index];
             }
             $visited[] = $index;
             $index = ($index + $day) % $quantity;
@@ -56,7 +72,7 @@ function calculateOrderLesson($students, $day, $n = 10) {
         $student = $students[$index];
         if (!in_array($index, $selectedIndices)) {
             if ($student['is_present_now'] && $student['was_present_before'] && $student['marks'] == 0)
-                $order[] = $student['surname'];
+                $order[] = $student;
             $selectedIndices[] = $index;
             $index = ($index + $day) % $quantity;
         } else {

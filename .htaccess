@@ -1,5 +1,11 @@
 RewriteEngine On
 RewriteRule ^admin$ admin.php [L]
+RewriteRule ^login$ login.php [L]
+RewriteRule ^logout$ logout.php [L]
+RewriteRule ^signup$ signup.php [L]
+RewriteRule ^profile$ profile.php [L]
 
-RewriteRule ^list(/([0-9]{4}-[0-9]{2}-[0-9]{2}))?$ api.php?type=list&date=$2 [L,QSA]
-RewriteRule ^exam-list(/([0-9]{4}-[0-9]{2}-[0-9]{2}))?$ api.php?type=exam-list&date=$2 [L,QSA]
+RewriteRule ^list$ api.php?type=list [L,QSA]
+RewriteRule ^list/([0-9]{4}-[0-9]{2}-[0-9]{2})$ api.php?type=list&date=$1 [L,QSA]
+RewriteRule ^examlist$ api.php?type=examlist [L,QSA]
+RewriteRule ^examlist/([0-9]{4}-[0-9]{2}-[0-9]{2})$ api.php?type=examlist&date=$1 [L,QSA]

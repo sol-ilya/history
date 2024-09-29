@@ -43,13 +43,18 @@ $day = (int)date('d', strtotime($selectedDate));
 $students = readStudents($pdo);
 $quantity = count($students);
 
+function filterColumns($student) {
+    return array('name' => $student['name'], 'nickname' => $student['nickname']);
+}
+
 // Вычисляем порядок в зависимости от типа запроса
 if ($quantity > 0) {
-    if ($type == 'exam-list') {
+    if ($type == 'examlist') {
         $order = calculateOrderExam($students, $day);
     } else {
         $order = calculateOrderLesson($students, $day);
     }
+    $order = array_map('filterColumns', $order);
 } else {
     echo json_encode(['error' => 'Список учеников пуст']);
     exit();
