@@ -7,7 +7,7 @@
             <a href="/">Школьный портал</a>
         </div>
         <div class="user-menu">
-            <?php if (isset($_SESSION['user_id'])): ?>
+            <?php if (isLoggedIn()): ?>
                 <div class="dropdown">
                     <span class="user-icon">&#128100;</span> <!-- Иконка пользователя -->
                     <div class="dropdown-content">

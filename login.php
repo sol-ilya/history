@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'session.php';
 require_once 'db_connect.php';
 require_once 'functions.php';
 
@@ -29,10 +29,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['is_admin'] = $user['is_admin'];
 
-
-            // Сохранение сессии в куки (например, на 30 дней)
-            setcookie(session_name(), session_id(), time() + (86400 * 30), "/");
-
+            if (isset($_SESSION['goto_after_login'])) {
+                $page = $_SESSION['goto_after_login'];
+                $_SESSION['goto_after_login'] = null;
+                header("Location: $page");
+                exit;
+            }
             header('Location: /');
             exit;
         } else {

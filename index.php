@@ -1,9 +1,9 @@
 <?php
-session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 // Подключение к базе данных и функции
+require_once 'session.php';
 require_once 'db_connect.php';
 require_once 'functions.php';
 
@@ -13,6 +13,7 @@ try {
     echo 'Подключение не удалось: ' . $e->getMessage();
     exit();
 }
+
 
 // Определяем выбранную дату и алгоритм
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -65,6 +66,7 @@ if (isLoggedIn() && $algorithm == 'lesson') {
     <title>Порядок ответов учеников</title>
     <link rel="stylesheet" href="style.css">
     <!-- Подключаем стили flatpickr -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 

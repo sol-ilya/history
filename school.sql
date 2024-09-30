@@ -82,6 +82,7 @@ CREATE TABLE `users` (
   `telegram` varchar(50) DEFAULT NULL,
   `password_hash` varchar(255) NOT NULL,
   `is_admin` tinyint(1) NOT NULL DEFAULT 0,
+  `api_token` VARCHAR(255) DEFAULT NULL UNIQUE,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),

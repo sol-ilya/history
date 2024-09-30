@@ -8,7 +8,15 @@ require_once 'db_connect.php';
 require_once 'functions.php';
 
 // Проверка, авторизован ли пользователь и является ли он админом
-if (!isLoggedIn() || !isAdmin()) {
+session_regenerate_id(true);
+if (!isLoggedIn()) {
+    $_SESSION['goto_after_login'] = '/admin';
+    header('Location: /login');
+    exit();
+}
+$_SESSION['goto_after_login'] = null; // На всякий случай
+
+if (!isAdmin()) {
     header('HTTP/1.1 403 Forbidden');
     echo 'Доступ запрещен.';
     exit();
@@ -85,6 +93,7 @@ $students = readStudents($pdo);
     <meta charset="UTF-8">
     <title>Консоль администратора</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>

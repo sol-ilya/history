@@ -1,18 +1,20 @@
 <?php
-session_start();
 // Включение отображения ошибок для отладки (удалите или закомментируйте в продакшене)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+require_once 'session.php';
 require_once 'db_connect.php';
 require_once 'functions.php';
 
 // Проверка, авторизован ли пользователь
-if (!isset($_SESSION['user_id'])) {
-    header('Location: /');
+if (!isLoggedIn()) {
+    $_SESSION['goto_after_login'] = '/profile';
+    header('Location: /login');
     exit();
 }
+$_SESSION['goto_after_login'] = null; // На всякий случай
 
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
@@ -23,6 +25,7 @@ try {
 $errors = [];
 $success = '';
 $success_password = '';
+$success_token = '';
 
 // Получение ID пользователя из сессии
 $user_id = $_SESSION['user_id'];
@@ -98,6 +101,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
     }
 }
 
+// Обработка генерации API-токена
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_token'])) {
+    // Генерация безопасного случайного токена
+    $token = bin2hex(random_bytes(16)); // 32-символьный токен
+
+    // Обновление токена в базе данных
+    $stmt = $pdo->prepare('UPDATE users SET api_token = ? WHERE id = ?');
+    try {
+        $stmt->execute([$token, $user_id]);
+        // Установка сообщения успеха
+        $_SESSION['success_token'] = 'API-токен успешно сгенерирован.';
+        // Редирект с фрагментом
+        header('Location: /profile#api-token-section');
+        exit();
+    } catch (PDOException $e) {
+        $errors[] = 'Ошибка при генерации токена: ' . $e->getMessage();
+    }
+}
+
 // Получение текущих данных пользователя вместе с фамилией из таблицы students
 $stmt = $pdo->prepare('
     SELECT u.*, s.name 
@@ -122,6 +144,11 @@ if (isset($_SESSION['success_password'])) {
     $success_password = $_SESSION['success_password'];
     unset($_SESSION['success_password']);
 }
+
+if (isset($_SESSION['success_token'])) {
+    $success_token = $_SESSION['success_token'];
+    unset($_SESSION['success_token']);
+}
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -143,6 +170,9 @@ if (isset($_SESSION['success_password'])) {
         <?php endif; ?>
         <?php if ($success_password): ?>
             <p class="success"><?php echo htmlspecialchars($success_password); ?></p>
+        <?php endif; ?>
+        <?php if ($success_token): ?>
+            <p class="success success_token"><?php echo htmlspecialchars($success_token); ?></p>
         <?php endif; ?>
 
         <!-- Сообщения об ошибках -->
@@ -212,6 +242,24 @@ if (isset($_SESSION['success_password'])) {
                 <input type="submit" value="Изменить пароль">
             </form>
         </div>
+
+        <!-- Форма для генерации API-токена -->
+        <div class="profile-section" id="api-token-section">
+            <h2>Управление API-токеном</h2>
+            <form method="post" class="profile-form">
+                <input type="hidden" name="generate_token" value="1">
+                <div class="form-group">
+                    <label for="api_token">Ваш API-токен:</label>
+                    <div class="token-container">
+                        <input type="text" id="api_token" value="<?php echo htmlspecialchars($user['api_token'] ?? 'Не сгенерирован'); ?>" readonly>
+                        <?php if ($user['api_token']): ?>
+                            <button type="button" id="copy_token" class="copy-button">Скопировать</button>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <input type="submit" value="Сгенерировать новый токен">
+            </form>
+        </div>
     </div>
     <footer>
         &copy; <?php echo date('Y'); ?> Школьный портал
@@ -219,5 +267,7 @@ if (isset($_SESSION['success_password'])) {
 
     <!-- Подключение внешнего JavaScript-файла -->
     <script src="js/togglePassword.js"></script>
+    <script src="js/copyToken.js"></script>
+    <script src="js/scrollToToken.js"></script>
 </body>
 </html>

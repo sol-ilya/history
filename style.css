@@ -681,3 +681,35 @@ a:hover {
 .profile-form input[type="submit"]:hover {
     background-color: var(--color-primary-hover);
 }
+
+/* Стили для контейнера токена */
+.token-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Стили для поля токена */
+.token-container input {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+}
+
+/* Стили для кнопки копирования */
+.copy-button {
+    padding: 10px 15px;
+    background-color: var(--color-primary);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 14px;
+}
+
+.copy-button:hover {
+    background-color: var(--color-primary-hover);
+}
