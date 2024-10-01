@@ -112,9 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
         <p>Нет аккаунта? <a href="/signup">Зарегистрируйтесь</a>.</p>
     </div>
-    <footer>
-        &copy; <?php echo date('Y'); ?> Школьный портал
-    </footer>
+    <?php include 'config/footer.php'; ?>
 
     <script src="js/togglePassword.js"></script>
 </body>

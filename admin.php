@@ -2,19 +2,9 @@
 require_once 'config/config.php';
 require_once 'config/functions.php';
 
-// Проверка, авторизован ли пользователь и является ли он админом
-if (!isLoggedIn()) {
-    $_SESSION['goto_after_login'] = $_SERVER['REQUEST_URI'];
-    header('Location: /login');
-    exit();
-}
-$_SESSION['goto_after_login'] = null; // На всякий случай
+require_once 'config/admins_only.php';
 
-if (!isAdmin()) {
-    header('HTTP/1.1 403 Forbidden');
-    echo 'Доступ запрещен.';
-    exit();
-}
+
 
 // Функция для сохранения данных об учениках в базу данных
 function saveStudents($pdo, $students) {
@@ -84,7 +74,7 @@ $students = readStudents($pdo);
 </head>
 
 <body>
-    <?php include 'header.php'; ?>
+    <?php include 'config/header.php'; ?>
     <div class="container">
         <h1>Консоль администратора</h1>
         <?php if (isset($message)): ?>
@@ -127,9 +117,7 @@ $students = readStudents($pdo);
             <input type="submit" value="Сохранить">
         </form>
     </div>
-    <footer>
-        &copy; <?php echo date('Y'); ?> Школьный портал
-    </footer>
+    <?php include 'config/footer.php'; ?>
     <script src="js/dropdownToggle.js"></script>
 </body>
 </html>

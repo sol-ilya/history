@@ -58,7 +58,7 @@ if (isLoggedIn() && $algorithm == 'lesson') {
 </head>
 
 <body>
-    <?php include 'header.php'; ?>
+    <?php include 'config/header.php'; ?>
     <div class="container">
         <h1>Порядок ответов учеников</h1>
         <form method="post">
@@ -102,9 +102,7 @@ if (isLoggedIn() && $algorithm == 'lesson') {
             <span><span class="lesson-day"></span> — Дни уроков</span>
         </div>
     </div>
-    <footer>
-        &copy; <?php echo date('Y'); ?> Школьный портал
-    </footer>
+    <?php include 'config/footer.php'; ?>
 
     <!-- Подключаем скрипты flatpickr -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

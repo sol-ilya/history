@@ -202,7 +202,7 @@ function authenticateByApiKey($pdo, $apiKey) {
     $stmt = $pdo->prepare('
         SELECT u.id AS user_id, u.nickname, u.is_admin, u.student_id
         FROM users u
-        WHERE u.api_token = ?
+        WHERE u.api_key = ?
     ');
     $stmt->execute([$apiKey]);
     return $stmt->fetch(PDO::FETCH_ASSOC);

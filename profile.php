@@ -2,19 +2,7 @@
 require_once 'config/config.php';
 require_once 'config/functions.php';
 
-// Проверка, авторизован ли пользователь и является ли он админом
-if (!isLoggedIn()) {
-    $_SESSION['goto_after_login'] = $_SERVER['REQUEST_URI'];
-    header('Location: /login');
-    exit();
-}
-$_SESSION['goto_after_login'] = null; // На всякий случай
-
-try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-} catch (PDOException $e) {
-    die('Подключение не удалось: ' . $e->getMessage());
-}
+require_once 'config/users_only.php';
 
 $errors = [];
 $success = '';
@@ -154,7 +142,7 @@ if (isset($_SESSION['success_key'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <?php include 'header.php'; ?>
+    <?php include 'config/header.php'; ?>
     <div class="container">
         <h1>Профиль</h1>
 
@@ -255,9 +243,7 @@ if (isset($_SESSION['success_key'])) {
             </form>
         </div>
     </div>
-    <footer>
-        &copy; <?php echo date('Y'); ?> Школьный портал
-    </footer>
+    <?php include 'config/footer.php'; ?>
 
     <!-- Подключение внешнего JavaScript-файла -->
     <script src="js/togglePassword.js"></script>

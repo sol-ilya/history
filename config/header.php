@@ -1,6 +1,7 @@
 <?php
 // header.php
 ?>
+
 <header>
     <div class="header-container">
         <div class="logo">
