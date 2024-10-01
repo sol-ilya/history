@@ -1,19 +1,6 @@
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
-// Подключение к базе данных и функции
-require_once 'session.php';
-require_once 'db_connect.php';
-require_once 'functions.php';
-
-try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-} catch (PDOException $e) {
-    echo 'Подключение не удалось: ' . $e->getMessage();
-    exit();
-}
-
+require_once 'config/config.php';
+require_once 'config/functions.php';
 
 // Определяем выбранную дату и алгоритм
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -144,5 +131,6 @@ if (isLoggedIn() && $algorithm == 'lesson') {
             }
         });
     </script>
+    <script src="js/dropdownToggle.js"></script>
 </body>
 </html>

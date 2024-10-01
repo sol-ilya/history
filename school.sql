@@ -68,6 +68,37 @@ INSERT INTO `students` VALUES
 UNLOCK TABLES;
 
 --
+-- Table structure for table `user_tokens`
+--
+
+DROP TABLE IF EXISTS `user_tokens`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_tokens` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `token_hash` varchar(64) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `token_hash` (`token_hash`),
+  CONSTRAINT `user_tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_tokens`
+--
+
+LOCK TABLES `user_tokens` WRITE;
+/*!40000 ALTER TABLE `user_tokens` DISABLE KEYS */;
+INSERT INTO `user_tokens` VALUES
+(7,6,'26af154ee21747870f5452032d21d0b220df07b41e469247d32c203a761dbfa1','2024-10-31 09:52:33'),
+(11,2,'1be9f21a70d4d0509f4897b9da31ea727c6952deee89fda0c171cb9357c7aba9','2024-10-31 10:14:06');
+/*!40000 ALTER TABLE `user_tokens` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `users`
 --
 
@@ -82,15 +113,29 @@ CREATE TABLE `users` (
   `telegram` varchar(50) DEFAULT NULL,
   `password_hash` varchar(255) NOT NULL,
   `is_admin` tinyint(1) NOT NULL DEFAULT 0,
-  `api_token` VARCHAR(255) DEFAULT NULL UNIQUE,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `api_key` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `student_unique` (`student_id`),
+  UNIQUE KEY `api_key` (`api_key`),
   CONSTRAINT `users_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Dumping data for table `users`
+--
+
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES
+(2,21,'ilya','Создатель','@solodovnikovilya','$2y$10$SIoGz2d9KLUebirdToFMv.vv1b2wtLt27k.JmeVExhaeR8mzgOasq',1,'2024-09-28 20:43:08','a42d8e05bdef6d06df97f6ff2adea696'),
+(3,10,'lew',NULL,NULL,'$2y$10$IQPXnFJyKdIU/FPi.IxQoeQ5sccSOPcVeHNaVSynWB3C8AKfizZ6y',0,'2024-09-28 21:16:09',NULL),
+(4,1,'sasha','Санек',NULL,'$2y$10$7uHFa9dxkI2nNiFVpnyW8ecBW90befYw9Z7t..0gjyPc/AdYhk9gS',1,'2024-09-29 08:44:03',NULL),
+(6,2,'vanya',NULL,NULL,'$2y$10$5WZAde8nY9a9cRqLcuR8Ze6fkJ72N4tYwtTf.2ImS6nXQgDT0K54O',0,'2024-10-01 09:43:40','80496291edff729fc31f5276fe9ab9ba');
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -101,4 +146,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2024-09-29 13:23:42
+-- Dump completed on 2024-10-01 14:33:30

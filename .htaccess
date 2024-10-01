@@ -1,13 +1,12 @@
 RewriteEngine On
+
+# Захватываем всё после /api и передаём в api.php как параметр 'path'
+RewriteCond %{REQUEST_URI} ^/api/(.*)$
+RewriteRule ^api/(.*)$ api.php?path=$1 [QSA,L]
+
+# Остальные правила для вашего сайта (если есть) остаются без изменений
 RewriteRule ^admin$ admin.php [L]
 RewriteRule ^login$ login.php [L]
 RewriteRule ^logout$ logout.php [L]
 RewriteRule ^signup$ signup.php [L]
 RewriteRule ^profile$ profile.php [L]
-
-RewriteRule ^list$ api.php?type=list [L,QSA]
-RewriteRule ^list/([0-9]{4}-[0-9]{2}-[0-9]{2})$ api.php?type=list&date=$1 [L,QSA]
-RewriteRule ^examlist$ api.php?type=examlist [L,QSA]
-RewriteRule ^examlist/([0-9]{4}-[0-9]{2}-[0-9]{2})$ api.php?type=examlist&date=$1 [L,QSA]
-
-RewriteRule ^c/([a-zA-Z0-9]+)(/([a-zA-Z0-9_-]+))?$ api.php?token=$1&action=$3 [L,QSA]

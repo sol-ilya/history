@@ -1,16 +1,10 @@
 <?php
-// Включение отображения ошибок для отладки (удалите или закомментируйте в продакшене)
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+require_once 'config/config.php';
+require_once 'config/functions.php';
 
-require_once 'session.php';
-require_once 'db_connect.php';
-require_once 'functions.php';
-
-// Проверка, авторизован ли пользователь
+// Проверка, авторизован ли пользователь и является ли он админом
 if (!isLoggedIn()) {
-    $_SESSION['goto_after_login'] = '/profile';
+    $_SESSION['goto_after_login'] = $_SERVER['REQUEST_URI'];
     header('Location: /login');
     exit();
 }
@@ -25,7 +19,7 @@ try {
 $errors = [];
 $success = '';
 $success_password = '';
-$success_token = '';
+$success_key = '';
 
 // Получение ID пользователя из сессии
 $user_id = $_SESSION['user_id'];
@@ -102,18 +96,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
 }
 
 // Обработка генерации API-токена
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_token'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_key'])) {
     // Генерация безопасного случайного токена
-    $token = bin2hex(random_bytes(16)); // 32-символьный токен
+    $key = bin2hex(random_bytes(16)); // 32-символьный токен
 
     // Обновление токена в базе данных
-    $stmt = $pdo->prepare('UPDATE users SET api_token = ? WHERE id = ?');
+    $stmt = $pdo->prepare('UPDATE users SET api_key = ? WHERE id = ?');
     try {
-        $stmt->execute([$token, $user_id]);
+        $stmt->execute([$key, $user_id]);
         // Установка сообщения успеха
-        $_SESSION['success_token'] = 'API-токен успешно сгенерирован.';
+        $_SESSION['success_key'] = 'API-токен успешно сгенерирован.';
         // Редирект с фрагментом
-        header('Location: /profile#api-token-section');
+        header('Location: /profile#api-key-section');
         exit();
     } catch (PDOException $e) {
         $errors[] = 'Ошибка при генерации токена: ' . $e->getMessage();
@@ -145,9 +139,9 @@ if (isset($_SESSION['success_password'])) {
     unset($_SESSION['success_password']);
 }
 
-if (isset($_SESSION['success_token'])) {
-    $success_token = $_SESSION['success_token'];
-    unset($_SESSION['success_token']);
+if (isset($_SESSION['success_key'])) {
+    $success_key = $_SESSION['success_key'];
+    unset($_SESSION['success_key']);
 }
 ?>
 <!DOCTYPE html>
@@ -171,8 +165,8 @@ if (isset($_SESSION['success_token'])) {
         <?php if ($success_password): ?>
             <p class="success"><?php echo htmlspecialchars($success_password); ?></p>
         <?php endif; ?>
-        <?php if ($success_token): ?>
-            <p class="success success_token"><?php echo htmlspecialchars($success_token); ?></p>
+        <?php if ($success_key): ?>
+            <p class="success success_key"><?php echo htmlspecialchars($success_key); ?></p>
         <?php endif; ?>
 
         <!-- Сообщения об ошибках -->
@@ -229,13 +223,13 @@ if (isset($_SESSION['success_token'])) {
 
                 <div class="form-group">
                     <label for="new_password">Новый пароль:</label>
-                    <input type="password" id="new_password" name="new_password" required>
+                    <input type="password" id="new_password" name="new_password" autocomplete="new-password" required>
                     <i class="fa-solid fa-eye toggle-password"></i>
                 </div>
 
                 <div class="form-group">
                     <label for="confirm_password">Подтвердите новый пароль:</label>
-                    <input type="password" id="confirm_password" name="confirm_password" required>
+                    <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required>
                     <i class="fa-solid fa-eye toggle-password"></i>
                 </div>
 
@@ -243,21 +237,21 @@ if (isset($_SESSION['success_token'])) {
             </form>
         </div>
 
-        <!-- Форма для генерации API-токена -->
-        <div class="profile-section" id="api-token-section">
-            <h2>Управление API-токеном</h2>
+        <!-- Форма для генерации API-ключа -->
+        <div class="profile-section" id="api-key-section">
+            <h2>Управление API-ключом</h2>
             <form method="post" class="profile-form">
-                <input type="hidden" name="generate_token" value="1">
+                <input type="hidden" name="generate_key" value="1">
                 <div class="form-group">
-                    <label for="api_token">Ваш API-токен:</label>
-                    <div class="token-container">
-                        <input type="text" id="api_token" value="<?php echo htmlspecialchars($user['api_token'] ?? 'Не сгенерирован'); ?>" readonly>
-                        <?php if ($user['api_token']): ?>
-                            <button type="button" id="copy_token" class="copy-button">Скопировать</button>
+                    <label for="api_key">Ваш API-ключ:</label>
+                    <div class="key-container">
+                        <input type="text" id="api_key" value="<?php echo htmlspecialchars($user['api_key'] ?? 'Не сгенерирован'); ?>" readonly>
+                        <?php if ($user['api_key']): ?>
+                            <button type="button" id="copy_key" class="copy-button">Скопировать</button>
                         <?php endif; ?>
                     </div>
                 </div>
-                <input type="submit" value="Сгенерировать новый токен">
+                <input type="submit" value="Сгенерировать новый ключ">
             </form>
         </div>
     </div>
@@ -267,7 +261,7 @@ if (isset($_SESSION['success_token'])) {
 
     <!-- Подключение внешнего JavaScript-файла -->
     <script src="js/togglePassword.js"></script>
-    <script src="js/copyToken.js"></script>
-    <script src="js/scrollToToken.js"></script>
+    <script src="js/copyKey.js"></script>
+    <script src="js/dropdownToggle.js"></script>
 </body>
 </html>

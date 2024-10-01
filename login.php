@@ -1,7 +1,6 @@
 <?php
-require_once 'session.php';
-require_once 'db_connect.php';
-require_once 'functions.php';
+require_once 'config/config.php';
+require_once 'config/functions.php';
 
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
@@ -25,9 +24,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($user && password_verify($password, $user['password_hash'])) {
             // Успешный вход
+
             session_regenerate_id(true);
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['is_admin'] = $user['is_admin'];
+    
+            if (isset($_POST['remember_me'])) {
+                // Генерация уникального токена
+                $token = bin2hex(random_bytes(32));
+    
+                // Хеширование токена для хранения в базе данных
+                $token_hash = hash('sha256', $token);
+    
+                // Установка времени истечения токена (например, 30 дней)
+                $expires_at = date('Y-m-d H:i:s', time() + (86400 * 30));
+    
+                // Сохранение токена в базе данных
+                $stmt = $pdo->prepare('INSERT INTO user_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)');
+                $stmt->execute([$user['id'], $token_hash, $expires_at]);
+    
+                // Установка куки с токеном
+                setcookie('remember_me', $token, [
+                    'expires' => time() + (86400 * 30),
+                    'path' => '/',
+                    'httponly' => true,
+                    'samesite' => 'Lax',
+                ]);
+            }
 
             if (isset($_SESSION['goto_after_login'])) {
                 $page = $_SESSION['goto_after_login'];
@@ -71,13 +94,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="post">
             <div class="form-group">
                 <label for="username">Имя пользователя:</label>
-                <input type="text" id="username" name="username" required value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
+                <input type="text" id="username" name="username" autocomplete="username" required value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
             </div>
 
             <div class="form-group">
                 <label for="password">Пароль:</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" autocomplete="current-password" required>
                 <i class="fa-solid fa-eye toggle-password"></i>
+            </div>
+
+            <div class="form-group">
+                <input type="checkbox" id="remember_me" name="remember_me" checked>
+                <label for="remember_me">Запомнить меня</label>
             </div>
 
             <input type="submit" value="Войти">

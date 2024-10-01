@@ -1,16 +1,10 @@
 <?php
-session_start();
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
-// Подключение к базе данных и функции
-require_once 'db_connect.php';
-require_once 'functions.php';
+require_once 'config/config.php';
+require_once 'config/functions.php';
 
 // Проверка, авторизован ли пользователь и является ли он админом
-session_regenerate_id(true);
 if (!isLoggedIn()) {
-    $_SESSION['goto_after_login'] = '/admin';
+    $_SESSION['goto_after_login'] = $_SERVER['REQUEST_URI'];
     header('Location: /login');
     exit();
 }
@@ -19,13 +13,6 @@ $_SESSION['goto_after_login'] = null; // На всякий случай
 if (!isAdmin()) {
     header('HTTP/1.1 403 Forbidden');
     echo 'Доступ запрещен.';
-    exit();
-}
-
-try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-} catch (PDOException $e) {
-    echo 'Подключение не удалось: ' . $e->getMessage();
     exit();
 }
 
@@ -143,5 +130,6 @@ $students = readStudents($pdo);
     <footer>
         &copy; <?php echo date('Y'); ?> Школьный портал
     </footer>
+    <script src="js/dropdownToggle.js"></script>
 </body>
 </html>

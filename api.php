@@ -6,330 +6,365 @@ error_reporting(E_ALL);
 header('Content-Type: application/json; charset=utf-8');
 
 // Подключение к базе данных и необходимые функции
-require_once 'db_connect.php';
-require_once 'functions.php'; // Убедитесь, что функция isAdminAPI определена здесь
+require_once 'config/db.php';
+require_once 'config/functions.php'; // Подключаем functions.php
 
+// Создаём подключение к базе данных
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (PDOException $e) {
-    echo json_encode(['error' => 'Подключение не удалось: ' . $e->getMessage()]);
-    exit();
+    respondWithError('Ошибка подключения к базе данных: ' . $e->getMessage(), 500);
 }
 
-// Получаем параметры из запроса
-$token = $_GET['token'] ?? null;
-$action = $_GET['action'] ?? null;
+// Получаем метод запроса
+$method = $_SERVER['REQUEST_METHOD'];
 
-// Получение метода запроса с проверкой
-$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+// Получаем параметр 'path' из URL
+$path = isset($_GET['path']) ? $_GET['path'] : '';
 
-// Аутентификация по токену, если токен предоставлен
-if ($token) {
-    $user = authenticateByToken($pdo, $token);
-    if (!$user) {
-        respondWithError('Недействительный токен', 401);
-    }
-} else {
-    $user = null; // Пользователь не аутентифицирован
+// Убираем ведущие и замыкающие слэши
+$path = trim($path, '/');
+
+// Разбиваем путь на сегменты
+$segments = explode('/', $path);
+
+// Получаем ресурс и дополнительные параметры из сегментов
+$resource = array_shift($segments);
+
+// Получаем API-ключ из заголовков
+$headers = getallheaders();
+$apiKey = $headers['X-API-Key'] ?? null;
+
+// Аутентификация пользователя по API-ключу
+$user = null;
+if ($apiKey) {
+    $user = authenticateByApiKey($pdo, $apiKey);
 }
 
-// Обработка административных действий, если параметр `action` предоставлен
-if ($action && $user && isAdminAPI($user)) {
-    switch ($action) {
-        case 'add-student':
-            if ($method !== 'POST') {
-                respondWithError('Метод не разрешён для этой операции.', 405);
+// Обработка запроса в зависимости от ресурса
+switch ($resource) {
+    case '':
+        // Главная страница или корневой ресурс
+        respondWithMessage('API работает. Пожалуйста, используйте правильный ресурс.', 200);
+        break;
+
+    case 'students':
+        // Доступ только для администраторов
+        if (!$user || !isAdminAPI($user)) {
+            respondWithError('Доступ запрещён. Требуется авторизация администратора.', 401);
+        }
+        $id = array_shift($segments);
+        handleStudents($method, $id, $user, $pdo);
+        break;
+
+    case 'order':
+    case 'examorder':
+        handleOrder($method, $resource, $segments, $pdo);
+        break;
+
+    case 'me':
+        // Доступ только для аутентифицированных пользователей
+        if (!$user) {
+            respondWithError('Требуется авторизация.', 401);
+        }
+        handleMe($method, $user, $pdo);
+        break;
+
+    default:
+        respondWithError('Ресурс не найден', 404);
+        break;
+}
+
+// Функции обработки запросов
+
+function handleStudents($method, $id, $user, $pdo) {
+    // Получение данных из тела запроса
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    switch ($method) {
+        case 'GET':
+            if ($id) {
+                // Получение информации о конкретном студенте
+                getStudent($pdo, $id);
+            } else {
+                // Получение списка всех студентов
+                getStudents($pdo);
             }
+            break;
 
-            // Получение данных из тела запроса (JSON)
-            $data = json_decode(file_get_contents('php://input'), true);
-            $name = trim($data['name'] ?? '');
-            $was_present_before = isset($data['was_present_before']) ? (int)$data['was_present_before'] : 0;
-            $is_present_now = isset($data['is_present_now']) ? (int)$data['is_present_now'] : 0;
-            $marks = isset($data['marks']) ? (int)$data['marks'] : 0;
+        case 'POST':
+            // Создание нового студента
+            createStudent($pdo, $input);
+            break;
 
-            // Валидация данных
-            if (empty($name)) {
-                respondWithError('Имя ученика обязательно.');
+        case 'PUT':
+            if (!$id) {
+                respondWithError('ID студента не указан', 400);
             }
+            // Обновление информации о студенте
+            updateStudent($pdo, $id, $input);
+            break;
 
-            // Создание ученика
-            $stmt = $pdo->prepare('INSERT INTO students (name, was_present_before, is_present_now, marks) VALUES (?, ?, ?, ?)');
-            try {
-                $stmt->execute([$name, $was_present_before, $is_present_now, $marks]);
-                $newStudentId = $pdo->lastInsertId();
-                echo json_encode(['success' => 'Ученик успешно добавлен.', 'student_id' => $newStudentId]);
-                exit();
-            } catch (PDOException $e) {
-                respondWithError('Ошибка при добавлении ученика: ' . $e->getMessage(), 500);
+        case 'DELETE':
+            if (!$id) {
+                respondWithError('ID студента не указан', 400);
             }
-
-        case 'update-student':
-            if ($method !== 'PUT') {
-                respondWithError('Метод не разрешён для этой операции.', 405);
-            }
-
-            // Получение данных из тела запроса (JSON)
-            $data = json_decode(file_get_contents('php://input'), true);
-
-            $student_id = $data['id'] ?? null;
-            if (!$student_id) {
-                respondWithError('ID ученика не указан.');
-            }
-
-            $name = isset($data['name']) ? htmlspecialchars(trim($data['name'])) : null;
-            $was_present_before = isset($data['was_present_before']) ? (int) $data['was_present_before'] : null;
-            $is_present_now = isset($data['is_present_now']) ? (int )$data['is_present_now'] : null;
-            $marks = isset($data['marks']) ? (int) $data['marks'] : null;
-            
-            updateStudent($pdo, $student_id, $name, $was_present_before, $is_present_now, $marks);
-
-        case 'delete-student':
-            if ($method !== 'DELETE') {
-                respondWithError('Метод не разрешён для этой операции.', 405);
-            }
-
-            // Получение ID ученика из параметров
-            $student_id = isset($_GET['id']) ? (int)$_GET['id'] : null;
-            if (!$student_id) {
-                respondWithError('ID ученика не указан.');
-            }
-
-            // Удаление ученика
-            $stmt = $pdo->prepare('DELETE FROM students WHERE id = ?');
-            try {
-                $stmt->execute([$student_id]);
-                echo json_encode(['success' => 'Ученик успешно удалён.']);
-                exit();
-            } catch (PDOException $e) {
-                respondWithError('Ошибка при удалении ученика: ' . $e->getMessage(), 500);
-            }
-
-        case 'get-student':
-            if ($method !== 'GET') {
-                respondWithError('Метод не разрешён для этой операции.', 405);
-            }
-
-            // Получение ID ученика из параметров
-            $student_id = isset($_GET['id']) ? (int)$_GET['id'] : null;
-            if (!$student_id) {
-                respondWithError('ID ученика не указан.');
-            }
-
-            // Получение данных ученика
-            $stmt = $pdo->prepare('SELECT * FROM students WHERE id = ?');
-            try {
-                $stmt->execute([$student_id]);
-                $student = $stmt->fetch();
-                if ($student) {
-                    // Фильтрация нужных столбцов
-                    echo json_encode(['student' => $student]);
-                    exit();
-                } else {
-                    respondWithError('Ученик с указанным ID не найден.', 404);
-                }
-            } catch (PDOException $e) {
-                respondWithError('Ошибка при получении данных ученика: ' . $e->getMessage(), 500);
-            }
-
-        case 'get-all-students':
-            if ($method !== 'GET') {
-                respondWithError('Метод не разрешён для этой операции.', 405);
-            }
-
-            // Получение всех учеников
-            $stmt = $pdo->prepare('SELECT * FROM students');
-            try {
-                $stmt->execute();
-                $students = $stmt->fetchAll();
-                echo json_encode(['students' => $students]);
-                exit();
-            } catch (PDOException $e) {
-                respondWithError('Ошибка при получении списка учеников: ' . $e->getMessage(), 500);
-            }
-
-        // Добавьте другие действия администратора здесь
+            // Удаление студента
+            deleteStudent($pdo, $id);
+            break;
 
         default:
-            respondWithError('Неизвестное действие.', 400);
+            respondWithError('Метод не поддерживается', 405);
+            break;
     }
 }
 
-// Если токен предоставлен и метод запроса PUT, но без `action`
-if ($user && $method === 'PUT' && !$action) {
-    // Аутентификация пользователя
-    if (!$user) {
-        respondWithError('Невозможно найти пользователя по данному токену.', 401);
+function handleOrder($method, $resource, $segments, $pdo) {
+    if ($method !== 'GET') {
+        respondWithError('Метод не поддерживается', 405);
     }
 
-    // Получаем данные из тела запроса
-    $data = json_decode(file_get_contents('php://input'), true);
+    // Получение даты из следующих сегментов, если указана
+    $dateParam = isset($segments[0]) ? $segments[0] : null;
 
-    $was_present_before = isset($data['was_present_before']) ? (int) $data['was_present_before'] : null;
-    $is_present_now = isset($data['is_present_now']) ? (int) $data['is_present_now'] : null;
-    $marks = isset($data['marks']) ? (int) $data['marks'] : null;
-
-    //Изменение имени обычному пользователю запрещено
-    updateStudent($pdo, $user['id'], null, $was_present_before, $is_present_now, $marks);
-}
-
-// Если токен предоставлен и нет `action`, возвращаем информацию о пользователе
-if ($user && !$action) {
-    // Форматирование данных пользователя для вывода
-    $userInfo = [
-        'user_id' => $user['user_id'],
-        'nickname' => $user['nickname'],
-        'is_admin' => (bool)$user['is_admin'],
-        'student' => [
-            'id' => $user['id'],
-            'name' => $user['name'],
-            'was_present_before' => (bool)$user['was_present_before'],
-            'is_present_now' => (bool)$user['is_present_now'],
-            'marks' => $user['marks']
-        ]
-    ];
-    echo json_encode(['user' => $userInfo]);
-    exit();
-}
-
-// Если токен не предоставлен, продолжаем обработку обычных запросов
-
-$type = $_GET['type'] ?? 'list';
-$dateParam = $_GET['date'] ?? null;
-
-// Определяем дни уроков
-$lessonDays = [2]; // 2 - вторник (0 - воскресенье, ..., 6 - суббота)
-
-// Определяем выбранную дату
-if ($dateParam) {
-    $selectedDate = $dateParam;
-} else {
-    $selectedDate = getNextLessonDate($lessonDays);
-}
-
-// Проверка корректности даты
-if (!validateDate($selectedDate)) {
-    respondWithError('Некорректная дата', 400);
-}
-
-// Получаем день месяца из выбранной даты
-$day = (int)date('d', strtotime($selectedDate));
-
-// Читаем данные об учениках
-$students = readStudents($pdo);
-$quantity = count($students);
-
-// Фильтрация нужных столбцов
-function filterColumns($columns, $array) {
-    $filtered = array();
-    foreach ($columns as $column) {
-        if (isset($array[$column])) {
-            $filtered[$column] = $array[$column];
-        } else {
-            $filtered[$column] = null;
+    // Определяем выбранную дату
+    if ($dateParam) {
+        if (!validateDate($dateParam)) {
+            respondWithError('Некорректная дата', 400);
         }
-    }
-
-    return $filtered;
-}
-
-// Вычисляем порядок в зависимости от типа запроса
-if ($quantity > 0) {
-    if ($type == 'examlist') {
-        $order = calculateOrderExam($students, $day);
+        $selectedDate = $dateParam;
     } else {
-        $order = calculateOrderLesson($students, $day);
+        $lessonDays = [2]; // 2 - вторник (0 - воскресенье, ..., 6 - суббота)
+        $selectedDate = getNextLessonDate($lessonDays);
     }
-    $order = array_map(function ($student) { 
-                            return filterColumns(['id', 'name', 'nickname'], $student);
-                       }, 
-                       $order);
-} else {
-    respondWithError('Список учеников пуст', 400);
-}
 
-// Возвращаем данные в формате JSON
-echo json_encode([
-    'date' => $selectedDate,
-    'type' => $type,
-    'order' => $order
-]);
+    // Получаем день месяца из выбранной даты
+    $day = (int)date('d', strtotime($selectedDate));
 
-// Функция для обработки ошибок
-function respondWithError($message, $code = 400) {
-    http_response_code($code);
-    echo json_encode(['error' => $message]);
+    // Читаем данные об учениках
+    $students = readStudents($pdo);
+    $quantity = count($students);
+
+    // Фильтрация нужных столбцов
+    function filterColumns($columns, $array) {
+        $filtered = array();
+        foreach ($columns as $column) {
+            $filtered[$column] = $array[$column] ?? null;
+        }
+        return $filtered;
+    }
+
+    // Вычисляем порядок в зависимости от ресурса
+    if ($quantity > 0) {
+        if ($resource == 'examorder') {
+            $order = calculateOrderExam($students, $day);
+        } else {
+            $order = calculateOrderLesson($students, $day);
+        }
+        $order = array_map(function ($student) {
+            return filterColumns(['id', 'name', 'nickname'], $student);
+        }, $order);
+    } else {
+        respondWithError('Список учеников пуст', 400);
+    }
+
+    // Возвращаем данные в формате JSON
+    echo json_encode([
+        'date' => $selectedDate,
+        'type' => $resource,
+        'order' => $order
+    ]);
     exit();
 }
 
+function handleMe($method, $user, $pdo) {
+    switch ($method) {
+        case 'GET':
+            // Возвращаем данные текущего пользователя
+            getCurrentUser($user, $pdo);
+            break;
 
-function authenticateByToken($pdo, $token) {
+        case 'PUT':
+            // Обновляем данные текущего пользователя, кроме поля 'name'
+            $input = json_decode(file_get_contents('php://input'), true);
+            updateCurrentUser($pdo, $user, $input);
+            break;
+
+        default:
+            respondWithError('Метод не поддерживается', 405);
+            break;
+    }
+}
+
+// Функции аутентификации и проверки прав
+
+function authenticateByApiKey($pdo, $apiKey) {
     $stmt = $pdo->prepare('
-        SELECT u.id AS user_id, u.nickname, u.is_admin, s.* 
-        FROM users u 
-        JOIN students s ON u.student_id = s.id 
+        SELECT u.id AS user_id, u.nickname, u.is_admin, u.student_id
+        FROM users u
         WHERE u.api_token = ?
     ');
-    $stmt->execute([$token]);
-    return $stmt->fetch();
+    $stmt->execute([$apiKey]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
 function isAdminAPI($user) {
     return isset($user['is_admin']) && $user['is_admin'] == 1;
 }
 
-function getStudentById($id) {
-    $stmt = $pdo->prepare('
-        SELECT * FROM students WHERE id = ?
-    ');
+// Функции обработки студентов
+
+function getStudent($pdo, $id) {
+    $stmt = $pdo->prepare('SELECT s.*, u.nickname FROM students s LEFT JOIN users u ON s.id = u.student_id WHERE s.id = ?');
     $stmt->execute([$id]);
-    return $stmt->fetch();
+    $student = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$student) {
+        respondWithError('Студент не найден', 404);
+    }
+    echo json_encode(['student' => $student]);
+    exit();
 }
 
-function updateStudent($pdo, $id, $name = null, $was_present_before = null, $is_present_now = null, $marks = null) {
+function getStudents($pdo) {
+    $students = readStudents($pdo);
+    echo json_encode(['students' => $students]);
+    exit();
+}
+
+function createStudent($pdo, $input) {
+    $name = trim($input['name'] ?? '');
+    $was_present_before = isset($input['was_present_before']) ? (int)$input['was_present_before'] : 0;
+    $is_present_now = isset($input['is_present_now']) ? (int)$input['is_present_now'] : 0;
+    $marks = isset($input['marks']) ? (int)$input['marks'] : 0;
+
+    if (empty($name)) {
+        respondWithError('Имя студента обязательно');
+    }
+
+    $stmt = $pdo->prepare('INSERT INTO students (name, was_present_before, is_present_now, marks) VALUES (?, ?, ?, ?)');
+    try {
+        $stmt->execute([$name, $was_present_before, $is_present_now, $marks]);
+        $newStudentId = $pdo->lastInsertId();
+        http_response_code(201);
+        echo json_encode(['message' => 'Студент создан', 'student_id' => $newStudentId]);
+        exit();
+    } catch (PDOException $e) {
+        respondWithError('Ошибка при создании студента: ' . $e->getMessage(), 500);
+    }
+}
+
+function updateStudent($pdo, $id, $input) {
     $fields = [];
     $values = [];
 
-    if (isset($name)) {
+    if (isset($input['name'])) {
         $fields[] = 'name = ?';
-        $values[] = $name;
+        $values[] = htmlspecialchars(trim($input['name']));
     }
-
-    if (isset($was_present_before)) {
+    if (isset($input['was_present_before'])) {
         $fields[] = 'was_present_before = ?';
-        $values[] = (int) $was_present_before;
+        $values[] = (int)$input['was_present_before'];
     }
-    
-    if (isset($is_present_now)) {
+    if (isset($input['is_present_now'])) {
         $fields[] = 'is_present_now = ?';
-        $values[] = (int) $is_present_now;
+        $values[] = (int)$input['is_present_now'];
     }
-
-    if (isset($marks)) {
+    if (isset($input['marks'])) {
         $fields[] = 'marks = ?';
-        $values[] = (int) $marks;
+        $values[] = (int)$input['marks'];
     }
 
-    // Если нет данных для обновления
     if (empty($fields)) {
-        respondWithError('Нет данных для обновления.', 400);
+        respondWithError('Нет данных для обновления', 400);
     }
 
-    // Добавляем ID пользователя в конец массива значений
     $values[] = $id;
-
-    // Создаём SQL-запрос с динамически сгенерированными полями
     $sql = 'UPDATE students SET ' . implode(', ', $fields) . ' WHERE id = ?';
 
-    // Выполняем обновление
     $stmt = $pdo->prepare($sql);
     try {
         $stmt->execute($values);
-        echo json_encode(['success' => 'Данные успешно обновлены.']);
+        echo json_encode(['message' => 'Данные студента обновлены']);
         exit();
     } catch (PDOException $e) {
         respondWithError('Ошибка при обновлении данных: ' . $e->getMessage(), 500);
     }
+}
 
+function deleteStudent($pdo, $id) {
+    $stmt = $pdo->prepare('DELETE FROM students WHERE id = ?');
+    try {
+        $stmt->execute([$id]);
+        echo json_encode(['message' => 'Студент удалён']);
+        exit();
+    } catch (PDOException $e) {
+        respondWithError('Ошибка при удалении студента: ' . $e->getMessage(), 500);
+    }
+}
+
+// Функции для /api/me
+
+function getCurrentUser($user, $pdo) {
+    // Получаем полную информацию о пользователе
+    $stmt = $pdo->prepare('
+        SELECT u.id AS user_id, u.nickname, u.is_admin, s.*
+        FROM users u
+        LEFT JOIN students s ON u.student_id = s.id
+        WHERE u.id = ?
+    ');
+    $stmt->execute([$user['user_id']]);
+    $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    echo json_encode(['user' => $userData]);
+    exit();
+}
+
+function updateCurrentUser($pdo, $user, $input) {
+    $fields = [];
+    $values = [];
+
+    // Разрешаем обновлять только определённые поля
+    if (isset($input['was_present_before'])) {
+        $fields[] = 'was_present_before = ?';
+        $values[] = (int)$input['was_present_before'];
+    }
+    if (isset($input['is_present_now'])) {
+        $fields[] = 'is_present_now = ?';
+        $values[] = (int)$input['is_present_now'];
+    }
+    if (isset($input['marks'])) {
+        $fields[] = 'marks = ?';
+        $values[] = (int)$input['marks'];
+    }
+
+    if (empty($fields)) {
+        respondWithError('Нет данных для обновления', 400);
+    }
+
+    $values[] = $user['student_id'];
+    $sql = 'UPDATE students SET ' . implode(', ', $fields) . ' WHERE id = ?';
+
+    $stmt = $pdo->prepare($sql);
+    try {
+        $stmt->execute($values);
+        echo json_encode(['message' => 'Ваши данные обновлены']);
+        exit();
+    } catch (PDOException $e) {
+        respondWithError('Ошибка при обновлении данных: ' . $e->getMessage(), 500);
+    }
+}
+
+// Функции обработки ошибок и сообщений
+
+function respondWithError($message, $code = 400) {
+    http_response_code($code);
+    echo json_encode(['error' => $message]);
+    exit();
+}
+
+function respondWithMessage($message, $code = 200) {
+    http_response_code($code);
+    echo json_encode(['message' => $message]);
+    exit();
 }
 ?>

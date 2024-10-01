@@ -46,7 +46,7 @@ body {
 header {
     background-color: var(--color-primary);
     color: #fff;
-    padding: 10px 20px;
+    padding: 15px 20px; /* Увеличили отступы для большей высоты */
     position: fixed;
     width: 100%;
     top: 0;
@@ -54,6 +54,7 @@ header {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Общие стили для header */
 .header-container {
     display: flex;
     justify-content: space-between;
@@ -63,7 +64,7 @@ header {
 .logo a {
     color: #fff;
     text-decoration: none;
-    font-size: 24px;
+    font-size: 26px; /* Увеличили размер шрифта */
     font-weight: bold;
 }
 
@@ -71,6 +72,7 @@ header {
     text-decoration: underline;
 }
 
+/* Стили для пользователя */
 .user-menu {
     position: relative;
 }
@@ -78,10 +80,15 @@ header {
 .user-menu a {
     color: #fff;
     text-decoration: none;
-    font-size: 18px;
+    font-size: 20px; /* Увеличили размер шрифта */
     margin-left: 15px;
     display: flex;
     align-items: center;
+}
+
+.user-menu a i {
+    margin-right: 8px;
+    font-size: 24px; /* Увеличили размер иконки */
 }
 
 .dropdown {
@@ -91,7 +98,7 @@ header {
 
 .user-icon {
     cursor: pointer;
-    font-size: 24px;
+    font-size: 28px; /* Увеличили размер иконки */
     display: flex;
     align-items: center;
 }
@@ -105,56 +112,63 @@ header {
     position: absolute;
     right: 0;
     background-color: var(--color-bg-content);
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    min-width: 200px; /* Увеличили минимальную ширину */
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
     border-radius: 4px;
     z-index: 1;
 }
 
 .dropdown-content a {
     color: var(--color-text);
-    padding: 12px 16px;
+    padding: 15px 20px; /* Увеличили отступы */
     text-decoration: none;
     display: block;
+    font-size: 18px; /* Увеличили размер шрифта */
 }
 
 .dropdown-content a:hover {
     background-color: var(--color-border-light);
 }
 
-.dropdown:hover .dropdown-content {
+.dropdown:hover .dropdown-content,
+.dropdown.active .dropdown-content {
     display: block;
 }
 
-/* Навигация (гамбургер-меню) */
-.navigation {
-    position: relative;
+/* Адаптивность */
+@media (max-width: 768px) {
+    /* Увеличиваем размер шапки */
+    header {
+        padding: 20px;
+    }
+
+    .logo a {
+        font-size: 24px;
+    }
+
+    .user-menu a {
+        font-size: 18px;
+    }
+
+    .user-menu a i {
+        font-size: 22px;
+    }
+
+    .user-icon {
+        font-size: 26px;
+    }
+
+    .dropdown-content {
+        min-width: 220px; /* Еще немного увеличили ширину */
+    }
+
+    .dropdown-content a {
+        padding: 18px 24px;
+        font-size: 20px; /* Увеличили размер шрифта */
+    }
 }
 
-.menu-toggle {
-    display: none;
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 24px;
-    cursor: pointer;
-}
-
-.nav-links {
-    list-style: none;
-    display: flex;
-    gap: 20px;
-}
-
-.nav-links li a {
-    color: #fff;
-    text-decoration: none;
-    font-size: 18px;
-}
-
-.nav-links li a:hover {
-    text-decoration: underline;
-}
+/* Остальные стили остаются без изменений */
 
 /* Сообщение пользователю */
 .user-alert {
@@ -435,114 +449,13 @@ input[type="checkbox"] {
     transform: scale(1.2);
 }
 
-/* Адаптивность */
-@media (max-width: 768px) {
-    .navigation {
-        position: relative;
-    }
-
-    .menu-toggle {
-        display: block;
-    }
-
-    .nav-links {
-        display: none;
-        flex-direction: column;
-        background-color: var(--color-primary);
-        position: absolute;
-        top: 50px;
-        right: 0;
-        width: 200px;
-        padding: 10px 0;
-        border-radius: 4px;
-    }
-
-    .nav-links.active {
-        display: flex;
-    }
-
-    .nav-links li {
-        padding: 10px 20px;
-    }
-
-    .user-menu {
-        display: none;
-    }
-}
-
-@media (max-width: 600px) {
-    .header-container {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .user-menu {
-        margin-top: 10px;
-    }
-
-    .user-menu a {
-        font-size: 16px;
-    }
-
-    .logo a {
-        font-size: 20px;
-    }
-
-    .flatpickr-day {
-        width: 30px;
-        height: 30px;
-        line-height: 30px;
-        margin: 2px;
-        font-size: 12px;
-    }
-
-    /* Центрирование форм и элементов */
-    form {
-        width: 100%;
-        padding: 0 10px;
-    }
-
-    input[type="text"],
-    input[type="password"],
-    select,
-    input[type="number"] {
-        max-width: 100%;
-    }
-
-    table th,
-    table td {
-        padding: 8px;
-    }
-
-    /* Улучшение мобильного меню */
-    .nav-links {
-        width: 100%;
-    }
-
-    .profile-section {
-        padding: 10px;
-    }
-
-    .profile-info p {
-        font-size: 16px;
-    }
-
-    .profile-form {
-        width: 100%;
-    }
-
-    .profile-form .form-group {
-        margin-bottom: 15px;
-    }
-}
-
 /* Дополнительные стили */
 
 /* Горизонтальное центрирование контейнера */
 .container {
     width: 80%;
     max-width: 800px;
-    margin: 80px auto 60px auto; /* Увеличен верхний отступ для учета фиксированной шапки */
+    margin: 100px auto 60px auto; /* Увеличен верхний отступ для учета увеличенной шапки */
     background: var(--color-bg-content);
     padding: 30px 40px;
     border-radius: 12px;
@@ -573,29 +486,17 @@ a:hover {
     color: var(--color-primary-hover);
 }
 
+.user-menu a i {
+    margin-right: 8px;
+}
+
 /* Иконки Font Awesome */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
-
-/* Мобильное меню */
-@media (max-width: 768px) {
-    .menu-toggle.active + .nav-links {
-        display: flex;
-    }
-}
 
 /* Прокрутка для выпадающего меню */
 .dropdown-content {
     overflow-y: auto;
     max-height: 300px;
-}
-
-/* Стили для кнопки меню */
-.menu-toggle {
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 24px;
-    cursor: pointer;
 }
 
 /* Стили для ошибок и уведомлений */
@@ -631,32 +532,6 @@ a:hover {
 .profile-form input[type="password"],
 .profile-form select,
 .profile-form input[type="number"] {
-    font-size: 16px;
-}
-
-.profile-form input[type="submit"] {
-    width: 100%;
-    max-width: none;
-}
-
-/* Форма для изменения пароля */
-.profile-section form {
-    border: 1px solid var(--color-border-light);
-    padding: 20px;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-}
-
-.profile-section form .form-group p {
-    font-size: 16px;
-    color: var(--color-text);
-}
-
-/* Стили для полей ввода в профиле */
-.profile-form input[type="text"],
-.profile-form input[type="password"],
-.profile-form select,
-.profile-form input[type="number"] {
     padding: 10px;
     border: 1px solid var(--color-border);
     border-radius: 4px;
@@ -666,7 +541,6 @@ a:hover {
     font-size: 16px;
 }
 
-/* Стили для кнопок в профиле */
 .profile-form input[type="submit"] {
     background-color: var(--color-primary);
     color: #fff;
@@ -683,14 +557,14 @@ a:hover {
 }
 
 /* Стили для контейнера токена */
-.token-container {
+.key-container {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 /* Стили для поля токена */
-.token-container input {
+.key-container input {
     flex: 1;
     padding: 10px;
     font-size: 16px;
@@ -712,4 +586,71 @@ a:hover {
 
 .copy-button:hover {
     background-color: var(--color-primary-hover);
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+    /* Увеличиваем размер шапки */
+    header {
+        padding: 25px 20px;
+    }
+
+    .logo a {
+        font-size: 22px;
+    }
+
+    .user-menu a {
+        font-size: 18px;
+    }
+
+    .user-menu a i {
+        font-size: 20px;
+    }
+
+    .user-icon {
+        font-size: 24px;
+    }
+
+    .dropdown-content {
+        min-width: 200px;
+    }
+
+    .dropdown-content a {
+        padding: 16px 20px;
+        font-size: 18px;
+    }
+
+    /* Центрирование форм и элементов */
+    form {
+        width: 100%;
+        padding: 0 10px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    select,
+    input[type="number"] {
+        max-width: 100%;
+    }
+
+    table th,
+    table td {
+        padding: 8px;
+    }
+
+    .profile-section {
+        padding: 10px;
+    }
+
+    .profile-info p {
+        font-size: 16px;
+    }
+
+    .profile-form {
+        width: 100%;
+    }
+
+    .profile-form .form-group {
+        margin-bottom: 15px;
+    }
 }

@@ -1,13 +1,6 @@
 <?php
-require_once 'session.php';
-require_once 'db_connect.php';
-require_once 'functions.php';
-
-try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-} catch (PDOException $e) {
-    die('Подключение не удалось: ' . $e->getMessage());
-}
+require_once 'config/config.php';
+require_once 'config/functions.php';
 
 // Чтение списка студентов без аккаунтов
 $stmt = $pdo->prepare('SELECT s.id, s.name FROM students s LEFT JOIN users u ON s.id = u.student_id WHERE u.id IS NULL');
@@ -70,20 +63,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $stmt->execute([$student_id, $username, $nickname ?: null, $telegram ?: null, $password_hash]);
 
-        $user_id = $pdo->lastInsertId();
+            $user_id = $pdo->lastInsertId();
 
-        session_regenerate_id(true);
-        $_SESSION['user_id'] = $user_id;
+            session_regenerate_id(true);
+            $_SESSION['user_id'] = $user_id;
+            
+            if (isset($_POST['remember_me'])) {
+                // Генерация уникального токена
+                $token = bin2hex(random_bytes(32));
 
-        if (isset($_SESSION['goto_after_login'])) {
-            $page = $_SESSION['goto_after_login'];
-            $_SESSION['goto_after_login'] = null;
-            header("Location: $page");
-            exit;
-        }
+                // Хеширование токена для хранения в базе данных
+                $token_hash = hash('sha256', $token);
 
-        header('Location: /');
-        exit();
+                // Установка времени истечения токена (например, 30 дней)
+                $expires_at = date('Y-m-d H:i:s', time() + (86400 * 30));
+
+                // Сохранение токена в базе данных
+                $stmt = $pdo->prepare('INSERT INTO user_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)');
+                $stmt->execute([$user_id, $token_hash, $expires_at]);
+
+                // Установка куки с токеном
+                setcookie('remember_me', $token, [
+                    'expires' => time() + (86400 * 30),
+                    'path' => '/',
+                    'httponly' => true,
+                    'samesite' => 'Lax',
+                ]);
+            }
+
+            if (isset($_SESSION['goto_after_login'])) {
+                $page = $_SESSION['goto_after_login'];
+                $_SESSION['goto_after_login'] = null;
+                header("Location: $page");
+                exit;
+            }
+
+            header('Location: /');
+            exit();
         } catch (PDOException $e) {
             $errors[] = 'Ошибка при регистрации: ' . $e->getMessage();
         }
@@ -124,12 +140,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="form-group">
                 <label for="username">Имя пользователя:</label>
-                <input type="text" id="username" name="username" required value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
+                <input type="text" id="username" name="username" autocomplete="username" required value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
             </div>
 
             <div class="form-group">
                 <label for="password">Пароль:</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" autocomplete="new-password" required>
                 <i class="fa-solid fa-eye toggle-password"></i>
             </div>
 
@@ -147,6 +163,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="form-group">
                 <label for="telegram">Telegram (необязательно):</label>
                 <input type="text" id="telegram" name="telegram" value="<?php echo htmlspecialchars($_POST['telegram'] ?? ''); ?>">
+            </div>
+
+            <div class="form-group">
+                <input type="checkbox" id="remember_me" name="remember_me" checked>
+                <label for="remember_me">Запомнить меня</label>
             </div>
 
             <input type="submit" value="Зарегистрироваться">

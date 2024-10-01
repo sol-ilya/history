@@ -1,12 +1,12 @@
-// copyToken.js
+// copyKey.js
 
 document.addEventListener('DOMContentLoaded', function() {
-    const copyButton = document.getElementById('copy_token');
+    const copyButton = document.getElementById('copy_key');
     if (copyButton) {
         copyButton.addEventListener('click', function() {
-            const tokenInput = document.getElementById('api_token');
-            tokenInput.select();
-            tokenInput.setSelectionRange(0, 99999); // Для мобильных устройств
+            const keyInput = document.getElementById('api_key');
+            keyInput.select();
+            keyInput.setSelectionRange(0, 99999); // Для мобильных устройств
 
             // Копирование текста
             document.execCommand('copy');
