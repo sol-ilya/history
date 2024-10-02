@@ -2,6 +2,10 @@
 require_once 'config/config.php';
 require_once 'config/functions.php';
 
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // Чтение списка студентов без аккаунтов
 $stmt = $pdo->prepare('SELECT s.id, s.name FROM students s LEFT JOIN users u ON s.id = u.student_id WHERE u.id IS NULL');
 $stmt->execute();
@@ -10,6 +14,9 @@ $available_students = $stmt->fetchAll();
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        die('Неверный CSRF токен');
+    }
     $student_id = $_POST['student_id'] ?? '';
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
@@ -128,6 +135,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="post">
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+
             <div class="form-group">
                 <label for="student_id">Выберите ученика:</label>
                 <select id="student_id" name="student_id" required>

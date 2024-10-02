@@ -2,15 +2,17 @@
 require_once 'config/config.php';
 require_once 'config/functions.php';
 
-try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-} catch (PDOException $e) {
-    die('Подключение не удалось: ' . $e->getMessage());
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        die('Неверный CSRF токен');
+    }
+    
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
@@ -92,6 +94,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="post">
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+
             <div class="form-group">
                 <label for="username">Имя пользователя:</label>
                 <input type="text" id="username" name="username" autocomplete="username" required value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
