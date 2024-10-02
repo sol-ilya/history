@@ -16,7 +16,9 @@
                         <a href="/profile">Профиль</a>
                         <?php if (isAdmin()): ?>
                             <a href="/admin">Консоль</a>
+                            <a href="/lessons">Расписание</a>
                         <?php endif; ?>
+
                         <a href="/logout">Выйти</a>
                     </div>
                 </div>

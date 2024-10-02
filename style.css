@@ -26,6 +26,10 @@
     --color-calendar-lesson-day-text: #2e7d32;
     --color-calendar-lesson-day-hover-bg: #81c784;
     --color-calendar-lesson-day-hover-text: #1b5e20;
+    --color-calendar-exam-day-bg: #f8bbd0;
+    --color-calendar-exam-day-text: #880e4f;
+    --color-calendar-exam-day-hover-bg: #f48fb1;
+    --color-calendar-exam-day-hover-text: #560027;
 }
 
 /* Сброс отступов и полей */
@@ -294,6 +298,15 @@ ol li:last-child {
     border-radius: 50%;
 }
 
+.legend .exam-day {
+    width: 12px;
+    height: 12px;
+    background-color: var(--color-calendar-exam-day-bg);
+    display: inline-block;
+    margin-right: 5px;
+    border-radius: 50%;
+}
+
 /* Стили flatpickr */
 .flatpickr-wrapper {
     width: 90%;
@@ -399,6 +412,21 @@ ol li:last-child {
     background-color: var(--color-calendar-lesson-day-hover-bg) !important;
     color: var(--color-calendar-lesson-day-hover-text) !important;
 }
+
+/* Выделение зачетных уроков */
+.flatpickr-day.exam-day {
+    background-color: var(--color-calendar-exam-day-bg) !important;
+    color: var(--color-calendar-exam-day-text) !important;
+    border-radius: 50%;
+    font-weight: bold;
+}
+
+.flatpickr-day.exam-day:hover,
+.flatpickr-day.exam-day.selected {
+    background-color: var(--color-calendar-exam-day-hover-bg) !important;
+    color: var(--color-calendar-exam-day-hover-text) !important;
+}
+
 
 .flatpickr-day.disabled {
     color: #ccc !important;

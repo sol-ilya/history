@@ -8,6 +8,7 @@ header('Content-Type: application/json; charset=utf-8');
 // Подключение к базе данных и необходимые функции
 require_once 'config/db.php';
 require_once 'config/functions.php'; // Подключаем functions.php
+date_default_timezone_set('Europe/Moscow');
 
 // Создаём подключение к базе данных
 try {
@@ -58,7 +59,8 @@ switch ($resource) {
         break;
 
     case 'order':
-    case 'examorder':
+    case 'lesson-order':
+    case 'exam-order':
         handleOrder($method, $resource, $segments, $pdo);
         break;
 
@@ -134,8 +136,7 @@ function handleOrder($method, $resource, $segments, $pdo) {
         }
         $selectedDate = $dateParam;
     } else {
-        $lessonDays = [2]; // 2 - вторник (0 - воскресенье, ..., 6 - суббота)
-        $selectedDate = getNextLessonDate($lessonDays);
+        $selectedDate = getNextLessonDate($pdo);
     }
 
     // Получаем день месяца из выбранной даты
@@ -156,10 +157,30 @@ function handleOrder($method, $resource, $segments, $pdo) {
 
     // Вычисляем порядок в зависимости от ресурса
     if ($quantity > 0) {
-        if ($resource == 'examorder') {
-            $order = calculateOrderExam($students, $day);
-        } else {
-            $order = calculateOrderLesson($students, $day);
+        switch ($resource) {
+            case 'lesson-order':
+                $type = 'lesson';
+                $order = calculateOrderLesson($students, $day);
+                break;
+            case 'exam-order':
+                $type = 'exam';
+                $order = calculateOrderExam($students, $day);
+                break;
+            case 'order':
+                $stmt = $pdo->query('SELECT lesson_date, lesson_type FROM lesson_dates');
+                $lessonDatesData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                $lessons = [];
+                foreach ($lessonDatesData as $lesson) {
+                    $lessons[$lesson['lesson_date']] = $lesson['lesson_type'];
+                }
+
+                $type = $lessons[$selectedDate] ?? respondWithError('На выбранную дату уроки не запланированы', 400);
+                if ($type == 'lesson') {
+                    $order = calculateOrderLesson($students, $day);
+                } else {
+                    $order = calculateOrderExam($students, $day);
+                }
         }
         $order = array_map(function ($student) {
             return filterColumns(['id', 'name', 'nickname'], $student);
@@ -171,7 +192,7 @@ function handleOrder($method, $resource, $segments, $pdo) {
     // Возвращаем данные в формате JSON
     echo json_encode([
         'date' => $selectedDate,
-        'type' => $resource,
+        'type' => $type,
         'order' => $order
     ]);
     exit();

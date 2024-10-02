@@ -2,18 +2,45 @@
 require_once 'config/config.php';
 require_once 'config/functions.php';
 
-// Определяем выбранную дату и алгоритм
+// Получение всех дат уроков с типом урока
+$stmt = $pdo->query('SELECT lesson_date, lesson_type FROM lesson_dates');
+$lessonDatesData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Преобразуем в формат, удобный для JavaScript
+$lessonDates = [];
+$examDates = [];
+foreach ($lessonDatesData as $entry) {
+    $lessonDates[] = $entry['lesson_date'];
+    if ($entry['lesson_type'] == 'exam') {
+        $examDates[] = $entry['lesson_date'];
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $selectedDate = $_POST['date'];
     $algorithm = $_POST['algorithm'];
 } else {
-    $selectedDate = getNextLessonDate($lessonDays);
-    $algorithm = 'lesson';
+    $selectedDate = getNextLessonDate($pdo);
+    $algorithm = 'auto';
 }
 
 // Проверка корректности даты
-if (!validateDate($selectedDate)) {
-    $selectedDate = getNextLessonDate($lessonDays);
+if (!validateDate($selectedDate, 'Y-m-d')) {
+    $selectedDate = getNextLessonDate($pdo);
+}
+
+// Если выбран алгоритм 'auto', определяем алгоритм на основе типа урока
+if ($algorithm == 'auto') {
+    // Получаем тип урока из базы данных
+    $stmt = $pdo->prepare('SELECT lesson_type FROM lesson_dates WHERE lesson_date = ?');
+    $stmt->execute([$selectedDate]);
+    $lessonType = $stmt->fetchColumn();
+
+    if ($lessonType == 'exam') {
+        $algorithm = 'exam';
+    } else {
+        $algorithm = 'lesson';
+    }
 }
 
 // Получаем день месяца из выбранной даты
@@ -69,8 +96,9 @@ if (isLoggedIn() && $algorithm == 'lesson') {
             <div class="form-group">
                 <label for="algorithm">Выберите алгоритм:</label>
                 <select id="algorithm" name="algorithm">
+                    <option value="auto" <?php if ($algorithm == 'auto') echo 'selected'; ?>>Авто</option>
                     <option value="lesson" <?php if ($algorithm == 'lesson') echo 'selected'; ?>>Работа на уроке</option>
-                    <option value="exam" <?php if ($algorithm == 'exam') echo 'selected'; ?>>Зачет</option>     
+                    <option value="exam" <?php if ($algorithm == 'exam') echo 'selected'; ?>>Зачет</option>
                 </select>
             </div>
             <input type="submit" value="Вычислить порядок">
@@ -99,8 +127,11 @@ if (isLoggedIn() && $algorithm == 'lesson') {
         <?php endif; ?>
 
         <div class="legend">
-            <span><span class="lesson-day"></span> — Дни уроков</span>
+            <span><span class="lesson-day"></span> — Урок</span>
+            <br>
+            <span><span class="exam-day"></span> — Зачет</span>
         </div>
+
     </div>
     <?php include 'config/footer.php'; ?>
 
@@ -108,27 +139,36 @@ if (isLoggedIn() && $algorithm == 'lesson') {
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script>
     <script>
-        // Определяем дни уроков (0 - воскресенье, 1 - понедельник, ..., 6 - суббота)
-        const lessonDays = [2]; // Здесь 2 - вторник
+        const lessonDates = <?php echo json_encode($lessonDates); ?>;
+        const examDates = <?php echo json_encode($examDates); ?>;
+
+        function formatDate(date) {
+            let year = date.getFullYear();
+            let month = (date.getMonth() + 1).toString().padStart(2, '0');
+            let day = date.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
 
         flatpickr("#date", {
             "locale": "ru",
             "dateFormat": "Y-m-d",
-            "defaultDate": "<?php echo htmlspecialchars($selectedDate); ?>",
             "disable": [
                 function(date) {
-                    // Отключаем даты, которые не являются днями уроков
-                    return !lessonDays.includes(date.getDay());
+                    const dateString = formatDate(date);
+                    return !lessonDates.includes(dateString);
                 }
             ],
             "onDayCreate": function(dObj, dStr, fp, dayElem) {
-                // Выделяем дни уроков
-                if (lessonDays.includes(dayElem.dateObj.getDay())) {
+                const dateString = formatDate(dayElem.dateObj);
+                if (lessonDates.includes(dateString)) {
                     dayElem.classList.add("lesson-day");
+                    if (examDates.includes(dateString)) {
+                        dayElem.classList.add("exam-day");
+                    }
                 }
             }
         });
     </script>
-    <script src="js/dropdownToggle.js"></script>
+
 </body>
 </html>

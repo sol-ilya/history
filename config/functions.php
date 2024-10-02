@@ -1,18 +1,18 @@
 <?php
-// Определяем дни уроков (например, вторник)
-$lessonDays = [2]; // 2 - вторник (0 - воскресенье, ..., 6 - суббота)
 
 // Функция для получения следующей даты урока
-function getNextLessonDate($lessonDays) {
-    $today = strtotime('today');
-    $currentDay = date('w', $today); // День недели сегодня (0 - воскресенье)
-    foreach (range(0, 6) as $i) {
-        $nextDay = ($currentDay + $i) % 7;
-        if (in_array($nextDay, $lessonDays)) {
-            return date('Y-m-d', strtotime("+$i days", $today));
-        }
+function getNextLessonDate($pdo) {
+    $today = date('Y-m-d');
+    $stmt = $pdo->prepare('SELECT lesson_date FROM lesson_dates WHERE lesson_date >= ? ORDER BY lesson_date ASC LIMIT 1');
+    $stmt->execute([$today]);
+    $nextLesson = $stmt->fetchColumn();
+
+    if ($nextLesson) {
+        return $nextLesson;
+    } else {
+        // Если нет будущих уроков, вернем текущую дату
+        return $today;
     }
-    return date('Y-m-d', $today); // Если что-то пойдет не так, вернем сегодняшнюю дату
 }
 
 // Функция для проверки корректности даты

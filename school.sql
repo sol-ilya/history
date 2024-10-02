@@ -17,6 +17,69 @@
 /*M!100616 SET @OLD_NOTE_VERBOSITY=@@NOTE_VERBOSITY, NOTE_VERBOSITY=0 */;
 
 --
+-- Table structure for table `lesson_dates`
+--
+
+DROP TABLE IF EXISTS `lesson_dates`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `lesson_dates` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `lesson_date` date NOT NULL,
+  `lesson_type` enum('lesson','exam') NOT NULL DEFAULT 'lesson',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `lesson_date` (`lesson_date`)
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `lesson_dates`
+--
+
+LOCK TABLES `lesson_dates` WRITE;
+/*!40000 ALTER TABLE `lesson_dates` DISABLE KEYS */;
+INSERT INTO `lesson_dates` VALUES
+(1,'2024-09-03','lesson'),
+(2,'2024-09-10','lesson'),
+(3,'2024-09-17','lesson'),
+(4,'2024-09-24','lesson'),
+(5,'2024-10-01','lesson'),
+(7,'2024-10-15','lesson'),
+(8,'2024-10-22','lesson'),
+(9,'2024-10-29','lesson'),
+(10,'2024-11-05','lesson'),
+(11,'2024-11-12','lesson'),
+(13,'2024-11-26','lesson'),
+(14,'2024-12-03','lesson'),
+(15,'2024-12-10','lesson'),
+(16,'2024-12-17','lesson'),
+(17,'2024-12-24','lesson'),
+(18,'2024-12-31','lesson'),
+(19,'2025-01-07','lesson'),
+(20,'2025-01-14','lesson'),
+(21,'2025-01-21','lesson'),
+(22,'2025-01-28','lesson'),
+(23,'2025-02-04','lesson'),
+(24,'2025-02-11','lesson'),
+(25,'2025-02-18','lesson'),
+(26,'2025-02-25','lesson'),
+(27,'2025-03-04','lesson'),
+(28,'2025-03-11','lesson'),
+(29,'2025-03-18','lesson'),
+(30,'2025-03-25','lesson'),
+(31,'2025-04-01','lesson'),
+(32,'2025-04-08','lesson'),
+(33,'2025-04-15','lesson'),
+(34,'2025-04-22','lesson'),
+(35,'2025-04-29','lesson'),
+(36,'2025-05-06','lesson'),
+(37,'2025-05-13','lesson'),
+(38,'2025-05-20','lesson'),
+(39,'2025-05-27','lesson');
+/*!40000 ALTER TABLE `lesson_dates` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `students`
 --
 
@@ -83,7 +146,7 @@ CREATE TABLE `user_tokens` (
   KEY `user_id` (`user_id`),
   KEY `token_hash` (`token_hash`),
   CONSTRAINT `user_tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -94,7 +157,7 @@ LOCK TABLES `user_tokens` WRITE;
 /*!40000 ALTER TABLE `user_tokens` DISABLE KEYS */;
 INSERT INTO `user_tokens` VALUES
 (7,6,'26af154ee21747870f5452032d21d0b220df07b41e469247d32c203a761dbfa1','2024-10-31 09:52:33'),
-(11,2,'1be9f21a70d4d0509f4897b9da31ea727c6952deee89fda0c171cb9357c7aba9','2024-10-31 10:14:06');
+(24,2,'8c5fef83f961fb8917cc414e33ee47dd888141cd07cc6240d44e271c56c6bff9','2024-11-01 01:27:40');
 /*!40000 ALTER TABLE `user_tokens` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -118,9 +181,9 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `student_unique` (`student_id`),
-  UNIQUE KEY `api_key` (`api_key`),
+  UNIQUE KEY `api_token` (`api_key`),
   CONSTRAINT `users_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -130,10 +193,11 @@ CREATE TABLE `users` (
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` VALUES
-(2,21,'ilya','Создатель','@solodovnikovilya','$2y$10$SIoGz2d9KLUebirdToFMv.vv1b2wtLt27k.JmeVExhaeR8mzgOasq',1,'2024-09-28 20:43:08','a42d8e05bdef6d06df97f6ff2adea696'),
+(2,21,'ilya','Создатель','@solodovnikovilya','$2y$10$SIoGz2d9KLUebirdToFMv.vv1b2wtLt27k.JmeVExhaeR8mzgOasq',1,'2024-09-28 20:43:08','aa8ffd2aa4d7e9ad89e4c8252a113dd5'),
 (3,10,'lew',NULL,NULL,'$2y$10$IQPXnFJyKdIU/FPi.IxQoeQ5sccSOPcVeHNaVSynWB3C8AKfizZ6y',0,'2024-09-28 21:16:09',NULL),
-(4,1,'sasha','Санек',NULL,'$2y$10$7uHFa9dxkI2nNiFVpnyW8ecBW90befYw9Z7t..0gjyPc/AdYhk9gS',1,'2024-09-29 08:44:03',NULL),
-(6,2,'vanya',NULL,NULL,'$2y$10$5WZAde8nY9a9cRqLcuR8Ze6fkJ72N4tYwtTf.2ImS6nXQgDT0K54O',0,'2024-10-01 09:43:40','80496291edff729fc31f5276fe9ab9ba');
+(4,1,'sasha','Санек',NULL,'$2y$10$7uHFa9dxkI2nNiFVpnyW8ecBW90befYw9Z7t..0gjyPc/AdYhk9gS',0,'2024-09-29 08:44:03',NULL),
+(6,2,'vanya',NULL,NULL,'$2y$10$5WZAde8nY9a9cRqLcuR8Ze6fkJ72N4tYwtTf.2ImS6nXQgDT0K54O',0,'2024-10-01 09:43:40','80496291edff729fc31f5276fe9ab9ba'),
+(7,3,'sima',NULL,NULL,'$2y$10$fJuMBZndxCTn0bZ4TdCE0ODiXR3GWg8VgNZrduNBu3sPgzCCS/AfG',0,'2024-10-01 11:39:22',NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -146,4 +210,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2024-10-01 14:33:30
+-- Dump completed on 2024-10-02 13:31:47

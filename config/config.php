@@ -51,4 +51,7 @@ if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_me'])) {
         setcookie('remember_me', '', time() - 3600, '/', '', false, true);
     }
 }
+
+date_default_timezone_set('Europe/Moscow');
+
 ?>

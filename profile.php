@@ -248,6 +248,5 @@ if (isset($_SESSION['success_key'])) {
     <!-- Подключение внешнего JavaScript-файла -->
     <script src="js/togglePassword.js"></script>
     <script src="js/copyKey.js"></script>
-    <script src="js/dropdownToggle.js"></script>
 </body>
 </html>

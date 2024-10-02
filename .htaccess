@@ -6,6 +6,7 @@ RewriteRule ^api/(.*)$ api.php?path=$1 [QSA,L]
 
 # Остальные правила для вашего сайта (если есть) остаются без изменений
 RewriteRule ^admin$ admin.php [L]
+RewriteRule ^lessons$ lessons.php [L]
 RewriteRule ^login$ login.php [L]
 RewriteRule ^logout$ logout.php [L]
 RewriteRule ^signup$ signup.php [L]
