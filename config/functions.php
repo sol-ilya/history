@@ -42,6 +42,13 @@ function e($string) {
     return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
 }
 
+function sanitizeString($string) {
+    $string = htmlspecialchars(trim($string), ENT_QUOTES, 'UTF-8');
+    $string = preg_replace('/\s+/', ' ', $string);
+    return $string;
+}
+
+
 // Остальные функции (calculateOrderExam, calculateOrderLesson) остаются без изменений
 function calculateOrderExam($students, $day) {
     $quantity = count($students);

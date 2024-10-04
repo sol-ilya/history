@@ -14,17 +14,8 @@ $user_id = $_SESSION['user_id'];
 
 // Обработка обновления профиля (никнейм и Telegram)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
-    $nickname = trim($_POST['nickname'] ?? '');
-    $telegram = trim($_POST['telegram'] ?? '');
-
-    // Валидация данных
-    if (strlen($nickname) > 50) {
-        $errors[] = 'Никнейм не должен превышать 50 символов.';
-    }
-
-    if (strlen($telegram) > 50) {
-        $errors[] = 'Telegram username не должен превышать 50 символов.';
-    }
+    $nickname = sanitizeString($_POST['nickname'] ?? '');
+    $telegram = sanitizeString($_POST['telegram'] ?? '');
 
     if (empty($errors)) {
         // Обновление данных
@@ -148,13 +139,13 @@ if (isset($_SESSION['success_key'])) {
 
         <!-- Сообщения об успехе -->
         <?php if ($success): ?>
-            <p class="success"><?php echo htmlspecialchars($success); ?></p>
+            <p class="success"><?php echo $success; ?></p>
         <?php endif; ?>
         <?php if ($success_password): ?>
-            <p class="success"><?php echo htmlspecialchars($success_password); ?></p>
+            <p class="success"><?php echo $success_password; ?></p>
         <?php endif; ?>
         <?php if ($success_key): ?>
-            <p class="success success_key"><?php echo htmlspecialchars($success_key); ?></p>
+            <p class="success success_key"><?php echo $success_key; ?></p>
         <?php endif; ?>
 
         <!-- Сообщения об ошибках -->
@@ -162,7 +153,7 @@ if (isset($_SESSION['success_key'])) {
             <div class="errors">
                 <ul>
                     <?php foreach ($errors as $error): ?>
-                        <li><?php echo htmlspecialchars($error); ?></li>
+                        <li><?php echo $error; ?></li>
                     <?php endforeach; ?>
                 </ul>
             </div>
@@ -172,10 +163,8 @@ if (isset($_SESSION['success_key'])) {
         <div class="profile-section">
             <h2>Основная информация</h2>
             <div class="profile-info">
-                <p><strong>ФИО:</strong> <?php echo htmlspecialchars($user['name']); ?></p>
-                <p><strong>Имя пользователя:</strong> <?php echo htmlspecialchars($user['username']); ?></p>
-                <!-- <p><strong>Никнейм:</strong> <?php echo htmlspecialchars($user['nickname'] ?? 'Не указано'); ?></p>
-                <p><strong>Telegram:</strong> <?php echo htmlspecialchars($user['telegram'] ?? 'Не указано'); ?></p> -->
+                <p><strong>ФИО:</strong> <?php echo $user['name']; ?></p>
+                <p><strong>Имя пользователя:</strong> <?php echo $user['username']; ?></p>
             </div>
         </div>
 
@@ -186,12 +175,14 @@ if (isset($_SESSION['success_key'])) {
                 <input type="hidden" name="update_profile" value="1">
                 <div class="form-group">
                     <label for="nickname">Никнейм:</label>
-                    <input type="text" id="nickname" name="nickname" value="<?php echo htmlspecialchars($user['nickname'] ?? ''); ?>">
+                    <input type="text" id="nickname" name="nickname" 
+                            placeholder="Мой ник" value="<?php echo $user['nickname'] ?? ''; ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="telegram">Telegram:</label>
-                    <input type="text" id="telegram" name="telegram" value="<?php echo htmlspecialchars($user['telegram'] ?? ''); ?>">
+                    <input type="text" id="telegram" name="telegram" 
+                            placeholder="@telegram_username" value="<?php echo $user['telegram'] ?? ''; ?>">
                 </div>
 
                 <input type="submit" value="Сохранить изменения">
@@ -233,7 +224,7 @@ if (isset($_SESSION['success_key'])) {
                 <div class="form-group">
                     <label for="api_key">Ваш API-ключ:</label>
                     <div class="key-container">
-                        <input type="text" id="api_key" value="<?php echo htmlspecialchars($user['api_key'] ?? 'Не сгенерирован'); ?>" readonly>
+                        <input type="text" id="api_key" value="<?php echo $user['api_key'] ?? 'Не сгенерирован'; ?>" readonly>
                         <?php if ($user['api_key']): ?>
                             <button type="button" id="copy_key" class="copy-button">Скопировать</button>
                         <?php endif; ?>

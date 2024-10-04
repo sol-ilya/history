@@ -18,11 +18,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die('Неверный CSRF токен');
     }
     $student_id = $_POST['student_id'] ?? '';
-    $username = trim($_POST['username'] ?? '');
+    $username = sanitizeString($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
     $password_confirm = $_POST['password_confirm'] ?? '';
-    $nickname = trim($_POST['nickname'] ?? '');
-    $telegram = trim($_POST['telegram'] ?? '');
+    $nickname = sanitizeString($_POST['nickname'] ?? '');
+    $telegram = sanitizeString($_POST['telegram'] ?? '');
 
     // Валидация данных
     if (empty($student_id)) {
@@ -128,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="errors">
                 <ul>
                     <?php foreach ($errors as $error): ?>
-                        <li><?php echo htmlspecialchars($error); ?></li>
+                        <li><?php echo $error; ?></li>
                     <?php endforeach; ?>
                 </ul>
             </div>
@@ -142,14 +142,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <select id="student_id" name="student_id" required>
                     <option value="">-- Выберите ученика --</option>
                     <?php foreach ($available_students as $s): ?>
-                        <option value="<?php echo $s['id']; ?>"><?php echo htmlspecialchars($s['name']); ?></option>
+                        <option value="<?php echo $s['id']; ?>"><?php echo $s['name']; ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="username">Имя пользователя:</label>
-                <input type="text" id="username" name="username" autocomplete="username" required value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
+                <input type="text" id="username" name="username" autocomplete="username" 
+                        placeholder="username" required value="<?php echo $_POST['username'] ?? ''; ?>">
             </div>
 
             <div class="form-group">
@@ -166,12 +167,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="form-group">
                 <label for="nickname">Никнейм (необязательно):</label>
-                <input type="text" id="nickname" name="nickname" value="<?php echo htmlspecialchars($_POST['nickname'] ?? ''); ?>">
+                <input type="text" id="nickname" name="nickname" 
+                        placeholder="Мой ник" value="<?php echo $_POST['nickname'] ?? ''; ?>">
             </div>
 
             <div class="form-group">
                 <label for="telegram">Telegram (необязательно):</label>
-                <input type="text" id="telegram" name="telegram" value="<?php echo htmlspecialchars($_POST['telegram'] ?? ''); ?>">
+                <input type="text" id="telegram" name="telegram" 
+                        placeholder="@telegram_username" value="<?php echo $_POST['telegram'] ?? ''; ?>">
             </div>
 
             <div class="form-group">
