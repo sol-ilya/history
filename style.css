@@ -427,7 +427,6 @@ ol li:last-child {
     color: var(--color-calendar-exam-day-hover-text) !important;
 }
 
-
 .flatpickr-day.disabled {
     color: #ccc !important;
     background-color: #f9f9f9 !important;
@@ -661,6 +660,12 @@ a:hover {
         max-width: 100%;
     }
 
+    .container {
+        width: 100%;
+        padding: 20px 10px;
+        overflow-x: auto; /* Добавлено для горизонтальной прокрутки */
+    }
+
     table th,
     table td {
         padding: 8px;
@@ -681,4 +686,32 @@ a:hover {
     .profile-form .form-group {
         margin-bottom: 15px;
     }
+
+    table.admin-table td:first-child {
+        width: 40%; /* Устанавливаем желаемую ширину для столбца ФИО */
+        text-align: left; /* Выравниваем текст по левому краю */
+    }
+    
+    table.admin-table td:last-child {
+        width: 15%;
+    }
+    
+    
 }
+
+/* Стили для горизонтальной прокрутки таблицы */
+.container {
+    overflow-x: auto;
+}
+
+/*Новые стили для увеличения ширины поля ФИО в admin.php*/
+
+table.admin-table td:first-child {
+    width: 40%; /* Устанавливаем желаемую ширину для столбца ФИО */
+    text-align: left; /* Выравниваем текст по левому краю */
+}
+
+table.admin-table td:last-child {
+    width: 15%;
+}
+

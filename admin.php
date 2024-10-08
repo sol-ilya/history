@@ -68,6 +68,7 @@ $students = readStudents($pdo);
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Консоль администратора</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -88,7 +89,7 @@ $students = readStudents($pdo);
 
         <!-- Форма для редактирования данных учеников -->
         <form method="post">
-            <table>
+            <table class="admin-table">
                 <tr>
                     <th>ФИО</th>
                     <th>Прошлый урок</th>

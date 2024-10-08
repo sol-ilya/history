@@ -127,6 +127,7 @@ if (isset($_SESSION['success_key'])) {
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Профиль</title>
     <link rel="stylesheet" href="style.css">
     <!-- Подключение Font Awesome -->
