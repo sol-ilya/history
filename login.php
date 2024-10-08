@@ -93,18 +93,18 @@ include 'config/header.php';
     <form method="post" class="mx-auto" style="max-width: 400px;">
         <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
-        <div class="form-group">
-            <label for="username">Имя пользователя:</label>
+        <div class="mb-3">
+            <label for="username" class="form-label">Имя пользователя:</label>
             <input type="text" id="username" name="username" class="form-control" autocomplete="username" required value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
         </div>
 
-        <div class="form-group position-relative">
-            <label for="password">Пароль:</label>
+        <div class="mb-3 position-relative">
+            <label for="password" class="form-label">Пароль:</label>
             <input type="password" id="password" name="password" class="form-control" autocomplete="current-password" required>
             <i class="fa-solid fa-eye toggle-password position-absolute" style="top: 38px; right: 10px; cursor: pointer;"></i>
         </div>
 
-        <div class="form-group form-check">
+        <div class="form-check mb-3">
             <input type="checkbox" id="remember_me" name="remember_me" class="form-check-input" checked>
             <label for="remember_me" class="form-check-label">Запомнить меня</label>
         </div>

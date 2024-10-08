@@ -1,5 +1,21 @@
 /* style.css */
 
+/* Переопределение цветовых переменных Bootstrap 5 */
+:root {
+    --bs-primary: #ff9800;
+    --bs-secondary: #fb8c00;
+    --bs-success: #4caf50;
+    --bs-info: #2196f3;
+    --bs-warning: #ffc107;
+    --bs-danger: #f44336;
+    --bs-light: #f8f9fa;
+    --bs-dark: #343a40;
+
+    /* Дополнительные переменные */
+    --bs-link-color: #ff9800;
+    --bs-link-hover-color: #fb8c00;
+}
+
 /* Кастомные стили, если они необходимы */
 
 /* Центрирование контейнера */
@@ -108,11 +124,9 @@
     color: #880e4f !important;
 }
 
-/* style.css */
-
 /* Кастомные стили для таблиц */
 .table thead th {
-    background-color: #343a40;
+    background-color: var(--bs-dark);
     color: #fff;
 }
 
@@ -151,7 +165,7 @@
 }
 
 .admin-table th {
-    background-color: #343a40;
+    background-color: var(--bs-dark);
     color: #fff;
 }
 
@@ -165,13 +179,31 @@
 
 /* Стили для кнопок */
 .btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
 }
 
-.btn-primary:hover {
-    background-color: #0069d9;
-    border-color: #0062cc;
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: var(--bs-secondary);
+    border-color: var(--bs-secondary);
+    box-shadow: none;
+    outline: none;
+}
+
+/* Убираем фокус и активное состояние */
+.btn:focus,
+.btn:active,
+.btn.focus,
+.btn.active,
+.btn:focus:active,
+.btn:not(:disabled):not(.disabled):active,
+.show > .btn.dropdown-toggle {
+    background-color: inherit;
+    border-color: inherit;
+    box-shadow: none;
+    outline: none;
 }
 
 /* Стили для формы */

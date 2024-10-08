@@ -77,16 +77,16 @@ $students = readStudents($pdo);
 
 <!-- Кнопка для переноса данных к следующему уроку -->
 <form method="post" class="mb-4">
+    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
     <button type="submit" name="move_to_next_lesson" class="btn btn-warning">Перенести данные к следующему уроку</button>
 </form>
 
 <!-- Форма для редактирования данных учеников -->
 <form method="post">
     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-    <input type="hidden" name="students[<?php echo $index; ?>][id]" value="<?php echo $student['id']; ?>">
     <div class="table-responsive">
         <table class="table table-bordered table-striped table-hover admin-table">
-            <thead class="thead-dark">
+            <thead class="table-dark">
                 <tr>
                     <th style="width: 40%;">ФИО</th>
                     <th style="width: 20%;">Прошлый урок</th>
@@ -116,10 +116,9 @@ $students = readStudents($pdo);
         </table>
     </div>
 
-    <button type="submit" name="update_type" class="btn btn-primary ml-2">
+    <button type="submit" name="update_type" class="btn btn-primary mt-3">
         <i class="fas fa-save"></i> Сохранить
     </button>
 </form>
-
 
 <?php include 'footer.php'; ?>

@@ -102,20 +102,20 @@ $lessonDates = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <!-- Форма для добавления новой даты урока -->
 <form method="post" class="mb-4">
     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-    <div class="form-row align-items-end">
-        <div class="form-group col-md-4">
-            <label for="new_lesson_date">Дата урока:</label>
+    <div class="row align-items-end">
+        <div class="col-md-4 mb-3">
+            <label for="new_lesson_date" class="form-label">Дата урока:</label>
             <input type="text" id="new_lesson_date" name="new_lesson_date" class="form-control" required>
         </div>
-        <div class="form-group col-md-4">
-            <label for="lesson_type">Тип урока:</label>
-            <select id="lesson_type" name="lesson_type" class="form-control">
+        <div class="col-md-4 mb-3">
+            <label for="lesson_type" class="form-label">Тип урока:</label>
+            <select id="lesson_type" name="lesson_type" class="form-select">
                 <option value="lesson">Обычный урок</option>
                 <option value="exam">Зачет</option>
             </select>
         </div>
-        <div class="form-group col-md-4">
-            <button type="submit" name="add_date" class="btn btn-primary btn-block">Добавить дату</button>
+        <div class="col-md-4 mb-3">
+            <button type="submit" name="add_date" class="btn btn-primary w-100">Добавить дату</button>
         </div>
     </div>
 </form>
@@ -124,7 +124,7 @@ $lessonDates = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <h2>Список дат уроков</h2>
 <div class="table-responsive">
     <table class="table table-bordered table-striped table-hover mt-3">
-        <thead class="thead-dark">
+        <thead class="table-dark">
             <tr>
                 <th>Дата урока</th>
                 <th>Тип урока</th>
@@ -136,16 +136,16 @@ $lessonDates = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <tr>
                     <td><?php echo date('d.m.Y', strtotime($entry['lesson_date'])); ?></td>
                     <td>
-                        <form method="post" class="form-inline">
+                        <form method="post" class="d-flex align-items-center">
                             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                             <input type="hidden" name="date_to_update" value="<?php echo htmlspecialchars($entry['lesson_date']); ?>">
-                            <div class="form-group">
-                                <select name="new_lesson_type" class="form-control">
+                            <div class="me-2">
+                                <select name="new_lesson_type" class="form-select">
                                     <option value="lesson" <?php if ($entry['lesson_type'] == 'lesson') echo 'selected'; ?>>Обычный урок</option>
                                     <option value="exam" <?php if ($entry['lesson_type'] == 'exam') echo 'selected'; ?>>Зачет</option>
                                 </select>
                             </div>
-                            <button type="submit" name="update_type" class="btn btn-primary ml-2">
+                            <button type="submit" name="update_type" class="btn btn-primary">
                                 <i class="fas fa-save"></i> Сохранить
                             </button>
                         </form>

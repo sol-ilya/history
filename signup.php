@@ -134,9 +134,9 @@ include 'config/header.php';
     <form method="post" class="mx-auto" style="max-width: 500px;">
         <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
-        <div class="form-group">
-            <label for="student_id">Выберите ученика:</label>
-            <select id="student_id" name="student_id" class="form-control" required>
+        <div class="mb-3">
+            <label for="student_id" class="form-label">Выберите ученика:</label>
+            <select id="student_id" name="student_id" class="form-select" required>
                 <option value="">-- Выберите ученика --</option>
                 <?php foreach ($available_students as $s): ?>
                     <option value="<?php echo $s['id']; ?>"><?php echo htmlspecialchars($s['name']); ?></option>
@@ -144,37 +144,37 @@ include 'config/header.php';
             </select>
         </div>
 
-        <div class="form-group">
-            <label for="username">Имя пользователя:</label>
+        <div class="mb-3">
+            <label for="username" class="form-label">Имя пользователя:</label>
             <input type="text" id="username" name="username" class="form-control" autocomplete="username" 
                     placeholder="username" required value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
         </div>
 
-        <div class="form-group position-relative">
-            <label for="password">Пароль:</label>
+        <div class="mb-3 position-relative">
+            <label for="password" class="form-label">Пароль:</label>
             <input type="password" id="password" name="password" class="form-control" autocomplete="new-password" required>
             <i class="fa-solid fa-eye toggle-password position-absolute" style="top: 38px; right: 10px; cursor: pointer;"></i>
         </div>
 
-        <div class="form-group position-relative">
-            <label for="password_confirm">Подтверждение пароля:</label>
+        <div class="mb-3 position-relative">
+            <label for="password_confirm" class="form-label">Подтверждение пароля:</label>
             <input type="password" id="password_confirm" name="password_confirm" class="form-control" required>
             <i class="fa-solid fa-eye toggle-password position-absolute" style="top: 38px; right: 10px; cursor: pointer;"></i>
         </div>
 
-        <div class="form-group">
-            <label for="nickname">Никнейм (необязательно):</label>
+        <div class="mb-3">
+            <label for="nickname" class="form-label">Никнейм (необязательно):</label>
             <input type="text" id="nickname" name="nickname" class="form-control" 
                     placeholder="Мой ник" value="<?php echo htmlspecialchars($_POST['nickname'] ?? ''); ?>">
         </div>
 
-        <div class="form-group">
-            <label for="telegram">Telegram (необязательно):</label>
+        <div class="mb-3">
+            <label for="telegram" class="form-label">Telegram (необязательно):</label>
             <input type="text" id="telegram" name="telegram" class="form-control" 
                     placeholder="@telegram_username" value="<?php echo htmlspecialchars($_POST['telegram'] ?? ''); ?>">
         </div>
 
-        <div class="form-group form-check">
+        <div class="form-check mb-3">
             <input type="checkbox" id="remember_me" name="remember_me" class="form-check-input" checked>
             <label for="remember_me" class="form-check-label">Запомнить меня</label>
         </div>

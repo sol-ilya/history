@@ -79,14 +79,14 @@ if (isLoggedIn() && $algorithm == 'lesson') {
 <div class="container container-custom">
     <h1 class="text-center mb-4">Порядок ответов учеников</h1>
     <form method="post" class="mb-4">
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="date">Выберите дату урока:</label>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="date" class="form-label">Выберите дату урока:</label>
                 <input type="text" id="date" name="date" class="form-control" value="<?php echo htmlspecialchars($selectedDate); ?>" required>
             </div>
-            <div class="form-group col-md-6">
-                <label for="algorithm">Выберите алгоритм:</label>
-                <select id="algorithm" name="algorithm" class="form-control">
+            <div class="col-md-6 mb-3">
+                <label for="algorithm" class="form-label">Выберите алгоритм:</label>
+                <select id="algorithm" name="algorithm" class="form-select">
                     <option value="auto" <?php if ($algorithm == 'auto') echo 'selected'; ?>>Авто</option>
                     <option value="lesson" <?php if ($algorithm == 'lesson') echo 'selected'; ?>>Работа на уроке</option>
                     <option value="exam" <?php if ($algorithm == 'exam') echo 'selected'; ?>>Зачет</option>

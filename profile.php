@@ -165,14 +165,14 @@ if (isset($_SESSION['success_key'])) {
         <h2>Редактировать профиль</h2>
         <form method="post" class="mx-auto" style="max-width: 500px;">
             <input type="hidden" name="update_profile" value="1">
-            <div class="form-group">
-                <label for="nickname">Никнейм:</label>
+            <div class="mb-3">
+                <label for="nickname" class="form-label">Никнейм:</label>
                 <input type="text" id="nickname" name="nickname" class="form-control"
                         placeholder="Мой ник" value="<?php echo htmlspecialchars($user['nickname'] ?? ''); ?>">
             </div>
 
-            <div class="form-group">
-                <label for="telegram">Telegram:</label>
+            <div class="mb-3">
+                <label for="telegram" class="form-label">Telegram:</label>
                 <input type="text" id="telegram" name="telegram" class="form-control"
                         placeholder="@telegram_username" value="<?php echo htmlspecialchars($user['telegram'] ?? ''); ?>">
             </div>
@@ -186,20 +186,20 @@ if (isset($_SESSION['success_key'])) {
         <h2>Изменить пароль</h2>
         <form method="post" class="mx-auto" style="max-width: 500px;">
             <input type="hidden" name="change_password" value="1">
-            <div class="form-group position-relative">
-                <label for="current_password">Текущий пароль:</label>
+            <div class="mb-3 position-relative">
+                <label for="current_password" class="form-label">Текущий пароль:</label>
                 <input type="password" id="current_password" name="current_password" class="form-control" required>
                 <i class="fa-solid fa-eye toggle-password position-absolute" style="top: 38px; right: 10px; cursor: pointer;"></i>
             </div>
 
-            <div class="form-group position-relative">
-                <label for="new_password">Новый пароль:</label>
+            <div class="mb-3 position-relative">
+                <label for="new_password" class="form-label">Новый пароль:</label>
                 <input type="password" id="new_password" name="new_password" class="form-control" autocomplete="new-password" required>
                 <i class="fa-solid fa-eye toggle-password position-absolute" style="top: 38px; right: 10px; cursor: pointer;"></i>
             </div>
 
-            <div class="form-group position-relative">
-                <label for="confirm_password">Подтвердите новый пароль:</label>
+            <div class="mb-3 position-relative">
+                <label for="confirm_password" class="form-label">Подтвердите новый пароль:</label>
                 <input type="password" id="confirm_password" name="confirm_password" class="form-control" autocomplete="new-password" required>
                 <i class="fa-solid fa-eye toggle-password position-absolute" style="top: 38px; right: 10px; cursor: pointer;"></i>
             </div>
@@ -213,8 +213,8 @@ if (isset($_SESSION['success_key'])) {
         <h2>Управление API-ключом</h2>
         <form method="post" class="mx-auto" style="max-width: 500px;">
             <input type="hidden" name="generate_key" value="1">
-            <div class="form-group">
-                <label for="api_key">Ваш API-ключ:</label>
+            <div class="mb-3">
+                <label for="api_key" class="form-label">Ваш API-ключ:</label>
                 <input type="text" id="api_key" class="form-control" value="<?php echo htmlspecialchars($user['api_key'] ?? 'Не сгенерирован'); ?>" readonly>
                 <?php if ($user['api_key']): ?>
                     <button type="button" id="copy_key" class="btn btn-secondary copy-button">Скопировать</button>
