@@ -67,109 +67,100 @@ if ($quantity > 0) {
 // Проверка, находится ли пользователь в списке
 if (isLoggedIn() && $algorithm == 'lesson') {
     if (in_array($_SESSION['user_id'], array_column($order, 'user_id'))){
-        $user_message = '<p class="user-alert" style="color: red; font-weight: bold; text-align: center; margin-top: 20px;">Возможно Вас спросят.</p>';
+        $user_message = '<p class="user-alert text-danger">Возможно Вас спросят.</p>';
     } else {
-        $user_message = '<p class="user-alert" style="color: green; font-weight: bold; text-align: center; margin-top: 20px;">Скорее всего Вас не спросят.</p>';
+        $user_message = '<p class="user-alert text-success">Скорее всего Вас не спросят.</p>';
     }
 }
 ?>
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Порядок ответов учеников</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Подключаем стили flatpickr -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-</head>
 
-<body>
-    <?php include 'config/header.php'; ?>
-    <div class="container">
-        <h1>Порядок ответов учеников</h1>
-        <form method="post">
-            <div class="form-group">
+<?php include 'config/header.php'; ?>
+
+<div class="container container-custom">
+    <h1 class="text-center mb-4">Порядок ответов учеников</h1>
+    <form method="post" class="mb-4">
+        <div class="form-row">
+            <div class="form-group col-md-6">
                 <label for="date">Выберите дату урока:</label>
-                <input type="text" id="date" name="date" value="<?php echo htmlspecialchars($selectedDate); ?>" required>
+                <input type="text" id="date" name="date" class="form-control" value="<?php echo htmlspecialchars($selectedDate); ?>" required>
             </div>
-            <div class="form-group">
+            <div class="form-group col-md-6">
                 <label for="algorithm">Выберите алгоритм:</label>
-                <select id="algorithm" name="algorithm">
+                <select id="algorithm" name="algorithm" class="form-control">
                     <option value="auto" <?php if ($algorithm == 'auto') echo 'selected'; ?>>Авто</option>
                     <option value="lesson" <?php if ($algorithm == 'lesson') echo 'selected'; ?>>Работа на уроке</option>
                     <option value="exam" <?php if ($algorithm == 'exam') echo 'selected'; ?>>Зачет</option>
                 </select>
             </div>
-            <input type="submit" value="Вычислить порядок">
-        </form>
+        </div>
+        <button type="submit" class="btn btn-primary">Вычислить порядок</button>
+    </form>
 
-        <?php if (isset($user_message)): ?>
-            <?php echo $user_message; ?>
-        <?php endif; ?>
+    <?php if (isset($user_message)): ?>
+        <?php echo $user_message; ?>
+    <?php endif; ?>
 
-        <?php if (!empty($order)): ?>
-            <h2>Порядок ответов на дату <?php echo date('d.m.Y', strtotime($selectedDate)); ?>:</h2>
-            <ol>
-                <?php foreach ($order as $student): ?>
-                    <li><?php 
+    <?php if (!empty($order)): ?>
+        <h2>Порядок ответов на дату <?php echo date('d.m.Y', strtotime($selectedDate)); ?>:</h2>
+        <ul class="list-group mt-3 numbered-list">
+            <?php foreach ($order as $student): ?>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <?php 
                         echo htmlspecialchars($student['name']);
                         if (isLoggedIn() && $_SESSION['user_id'] == $student['user_id'])
                             echo ' (Вы)';
                         elseif ($student['nickname'])
                             echo ' ('. htmlspecialchars($student['nickname']) . ')';
-                    
-                    ?></li>
-                <?php endforeach; ?>
-            </ol>
-        <?php else: ?>
-            <p>Нет доступных учеников для выбранного алгоритма и даты.</p>
-        <?php endif; ?>
+                    ?>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    <?php else: ?>
+        <p>Нет доступных учеников для выбранного алгоритма и даты.</p>
+    <?php endif; ?>
 
-        <div class="legend">
-            <span><span class="lesson-day"></span> — Урок</span>
-            <br>
-            <span><span class="exam-day"></span> — Зачет</span>
-        </div>
 
+    <div class="legend">
+        <span><span class="lesson-day"></span> — Урок</span>
+        <br>
+        <span><span class="exam-day"></span> — Зачет</span>
     </div>
-    <?php include 'config/footer.php'; ?>
+</div>
 
-    <!-- Подключаем скрипты flatpickr -->
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script>
-    <script>
-        const lessonDates = <?php echo json_encode($lessonDates); ?>;
-        const examDates = <?php echo json_encode($examDates); ?>;
+<!-- Подключаем скрипты Flatpickr -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script>
 
-        function formatDate(date) {
-            let year = date.getFullYear();
-            let month = (date.getMonth() + 1).toString().padStart(2, '0');
-            let day = date.getDate().toString().padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
+<script>
+    const lessonDates = <?php echo json_encode($lessonDates); ?>;
+    const examDates = <?php echo json_encode($examDates); ?>;
 
-        flatpickr("#date", {
-            "locale": "ru",
-            "dateFormat": "Y-m-d",
-            "disable": [
-                function(date) {
-                    const dateString = formatDate(date);
-                    return !lessonDates.includes(dateString);
-                }
-            ],
-            "onDayCreate": function(dObj, dStr, fp, dayElem) {
-                const dateString = formatDate(dayElem.dateObj);
-                if (lessonDates.includes(dateString)) {
-                    dayElem.classList.add("lesson-day");
-                    if (examDates.includes(dateString)) {
-                        dayElem.classList.add("exam-day");
-                    }
+    function formatDate(date) {
+        let year = date.getFullYear();
+        let month = (date.getMonth() + 1).toString().padStart(2, '0');
+        let day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    flatpickr("#date", {
+        "locale": "ru",
+        "dateFormat": "Y-m-d",
+        "disable": [
+            function(date) {
+                const dateString = formatDate(date);
+                return !lessonDates.includes(dateString);
+            }
+        ],
+        "onDayCreate": function(dObj, dStr, fp, dayElem) {
+            const dateString = formatDate(dayElem.dateObj);
+            if (lessonDates.includes(dateString)) {
+                dayElem.classList.add("lesson-day");
+                if (examDates.includes(dateString)) {
+                    dayElem.classList.add("exam-day");
                 }
             }
-        });
-    </script>
+        }
+    });
+</script>
 
-</body>
-</html>
+<?php include 'config/footer.php'; ?>

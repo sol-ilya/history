@@ -113,82 +113,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Регистрация</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <div class="container">
-        <h1>Регистрация</h1>
-        <?php if (!empty($errors)): ?>
-            <div class="errors">
-                <ul>
-                    <?php foreach ($errors as $error): ?>
-                        <li><?php echo $error; ?></li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-        <?php endif; ?>
 
-        <form method="post">
-            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+<?php 
+$special_page = true; 
+include 'config/header.php';
+?>
 
-            <div class="form-group">
-                <label for="student_id">Выберите ученика:</label>
-                <select id="student_id" name="student_id" required>
-                    <option value="">-- Выберите ученика --</option>
-                    <?php foreach ($available_students as $s): ?>
-                        <option value="<?php echo $s['id']; ?>"><?php echo $s['name']; ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+<div class="container container-custom">
+    <h1 class="text-center mb-4">Регистрация</h1>
+    <?php if (!empty($errors)): ?>
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                <?php foreach ($errors as $error): ?>
+                    <li><?php echo htmlspecialchars($error); ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
 
-            <div class="form-group">
-                <label for="username">Имя пользователя:</label>
-                <input type="text" id="username" name="username" autocomplete="username" 
-                        placeholder="username" required value="<?php echo $_POST['username'] ?? ''; ?>">
-            </div>
+    <form method="post" class="mx-auto" style="max-width: 500px;">
+        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
-            <div class="form-group">
-                <label for="password">Пароль:</label>
-                <input type="password" id="password" name="password" autocomplete="new-password" required>
-                <i class="fa-solid fa-eye toggle-password"></i>
-            </div>
+        <div class="form-group">
+            <label for="student_id">Выберите ученика:</label>
+            <select id="student_id" name="student_id" class="form-control" required>
+                <option value="">-- Выберите ученика --</option>
+                <?php foreach ($available_students as $s): ?>
+                    <option value="<?php echo $s['id']; ?>"><?php echo htmlspecialchars($s['name']); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
 
-            <div class="form-group">
-                <label for="password_confirm">Подтверждение пароля:</label>
-                <input type="password" id="password_confirm" name="password_confirm" required>
-                <i class="fa-solid fa-eye toggle-password"></i>
-            </div>
+        <div class="form-group">
+            <label for="username">Имя пользователя:</label>
+            <input type="text" id="username" name="username" class="form-control" autocomplete="username" 
+                    placeholder="username" required value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
+        </div>
 
-            <div class="form-group">
-                <label for="nickname">Никнейм (необязательно):</label>
-                <input type="text" id="nickname" name="nickname" 
-                        placeholder="Мой ник" value="<?php echo $_POST['nickname'] ?? ''; ?>">
-            </div>
+        <div class="form-group position-relative">
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" class="form-control" autocomplete="new-password" required>
+            <i class="fa-solid fa-eye toggle-password position-absolute" style="top: 38px; right: 10px; cursor: pointer;"></i>
+        </div>
 
-            <div class="form-group">
-                <label for="telegram">Telegram (необязательно):</label>
-                <input type="text" id="telegram" name="telegram" 
-                        placeholder="@telegram_username" value="<?php echo $_POST['telegram'] ?? ''; ?>">
-            </div>
+        <div class="form-group position-relative">
+            <label for="password_confirm">Подтверждение пароля:</label>
+            <input type="password" id="password_confirm" name="password_confirm" class="form-control" required>
+            <i class="fa-solid fa-eye toggle-password position-absolute" style="top: 38px; right: 10px; cursor: pointer;"></i>
+        </div>
 
-            <div class="form-group">
-                <input type="checkbox" id="remember_me" name="remember_me" checked>
-                <label for="remember_me">Запомнить меня</label>
-            </div>
+        <div class="form-group">
+            <label for="nickname">Никнейм (необязательно):</label>
+            <input type="text" id="nickname" name="nickname" class="form-control" 
+                    placeholder="Мой ник" value="<?php echo htmlspecialchars($_POST['nickname'] ?? ''); ?>">
+        </div>
 
-            <input type="submit" value="Зарегистрироваться">
-        </form>
-        <p>Уже есть аккаунт? <a href="/login">Войдите</a>.</p>
-    </div>
-    <?php include 'config/footer.php'; ?>
+        <div class="form-group">
+            <label for="telegram">Telegram (необязательно):</label>
+            <input type="text" id="telegram" name="telegram" class="form-control" 
+                    placeholder="@telegram_username" value="<?php echo htmlspecialchars($_POST['telegram'] ?? ''); ?>">
+        </div>
 
-    <script src="js/togglePassword.js"></script>
-</body>
-</html>
+        <div class="form-group form-check">
+            <input type="checkbox" id="remember_me" name="remember_me" class="form-check-input" checked>
+            <label for="remember_me" class="form-check-label">Запомнить меня</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Зарегистрироваться</button>
+    </form>
+    <p class="text-center mt-3">Уже есть аккаунт? <a href="/login">Войдите</a>.</p>
+</div>
+
+<?php include 'config/footer.php'; ?>

@@ -1,532 +1,32 @@
 /* style.css */
 
-/* Определение CSS-переменных для цветов и шрифтов */
-:root {
-    --font-family: 'Helvetica Neue', Arial, sans-serif;
-    --color-bg: #f4f7fa;
-    --color-bg-content: #fff;
-    --color-text: #333;
-    --color-text-secondary: #555;
-    --color-primary: #28a745;
-    --color-primary-hover: #209a3c;
-    --color-border: #ccc;
-    --color-border-light: #ddd;
-    --color-success: #d4edda;
-    --color-error: #dc3545;
-    --color-warning: #ffc107;
-    --color-info: #17a2b8;
-    --color-calendar-bg: #fafafa;
-    --color-calendar-header: #f0f0f0;
-    --color-calendar-weekdays: #f7f7f7;
-    --color-calendar-today-bg: #cce5ff;
-    --color-calendar-today-text: #0056b3;
-    --color-calendar-selected-bg: #0056b3;
-    --color-calendar-selected-text: #fff;
-    --color-calendar-lesson-day-bg: #a5d6a7;
-    --color-calendar-lesson-day-text: #2e7d32;
-    --color-calendar-lesson-day-hover-bg: #81c784;
-    --color-calendar-lesson-day-hover-text: #1b5e20;
-    --color-calendar-exam-day-bg: #f8bbd0;
-    --color-calendar-exam-day-text: #880e4f;
-    --color-calendar-exam-day-hover-bg: #f48fb1;
-    --color-calendar-exam-day-hover-text: #560027;
+/* Кастомные стили, если они необходимы */
+
+/* Центрирование контейнера */
+.container-custom {
+    margin-top: 100px; /* Отступ сверху для учета фиксированной шапки */
+    margin-bottom: 60px;
 }
 
-/* Сброс отступов и полей */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/* Основные стили */
-body {
-    font-family: var(--font-family);
-    background-color: var(--color-bg);
-    color: var(--color-text);
-}
-
-/* Шапка */
-header {
-    background-color: var(--color-primary);
-    color: #fff;
-    padding: 15px 20px; /* Увеличили отступы для большей высоты */
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Общие стили для header */
-.header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo a {
-    color: #fff;
-    text-decoration: none;
-    font-size: 26px; /* Увеличили размер шрифта */
-    font-weight: bold;
-}
-
-.logo a:hover {
-    text-decoration: underline;
-}
-
-/* Стили для пользователя */
-.user-menu {
-    position: relative;
-}
-
-.user-menu a {
-    color: #fff;
-    text-decoration: none;
-    font-size: 20px; /* Увеличили размер шрифта */
-    margin-left: 15px;
-    display: flex;
-    align-items: center;
-}
-
-.user-menu a i {
-    margin-right: 8px;
-    font-size: 24px; /* Увеличили размер иконки */
-}
-
-.dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-.user-icon {
-    cursor: pointer;
-    font-size: 28px; /* Увеличили размер иконки */
-    display: flex;
-    align-items: center;
-}
-
-.user-icon i {
-    color: #fff;
-}
-
-.dropdown-content {
-    display: none;
-    position: absolute;
-    right: 0;
-    background-color: var(--color-bg-content);
-    min-width: 200px; /* Увеличили минимальную ширину */
-    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
-    border-radius: 4px;
-    z-index: 1;
-}
-
-.dropdown-content a {
-    color: var(--color-text);
-    padding: 15px 20px; /* Увеличили отступы */
-    text-decoration: none;
-    display: block;
-    font-size: 18px; /* Увеличили размер шрифта */
-}
-
-.dropdown-content a:hover {
-    background-color: var(--color-border-light);
-}
-
-.dropdown:hover .dropdown-content,
-.dropdown.active .dropdown-content {
-    display: block;
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-    /* Увеличиваем размер шапки */
-    header {
-        padding: 20px;
-    }
-
-    .logo a {
-        font-size: 24px;
-    }
-
-    .user-menu a {
-        font-size: 18px;
-    }
-
-    .user-menu a i {
-        font-size: 22px;
-    }
-
-    .user-icon {
-        font-size: 26px;
-    }
-
-    .dropdown-content {
-        min-width: 220px; /* Еще немного увеличили ширину */
-    }
-
-    .dropdown-content a {
-        padding: 18px 24px;
-        font-size: 20px; /* Увеличили размер шрифта */
-    }
-}
-
-/* Остальные стили остаются без изменений */
-
-/* Сообщение пользователю */
-.user-alert {
-    color: red;
-    font-weight: bold;
-    text-align: center;
-    margin-top: 20px;
-}
-
-/* Сообщения об ошибках */
-.errors {
-    background-color: #ffe6e6;
-    border: 1px solid var(--color-error);
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 4px;
-}
-
-.errors ul {
-    list-style-type: none;
-}
-
-.errors li {
-    color: var(--color-error);
-}
-
-/* Сообщения об успехе */
+/* Сообщения об успехе и ошибках */
 .success {
-    background-color: var(--color-success);
-    border: 1px solid #c3e6cb;
     color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
     padding: 10px;
-    border-radius: 4px;
     margin-bottom: 20px;
+    border-radius: 4px;
 }
 
-/* Формы */
-form {
-    margin-bottom: 30px;
-    text-align: center;
-}
-
-label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: var(--color-text-secondary);
-}
-
-.form-group {
+.errors {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    padding: 10px;
     margin-bottom: 20px;
-    text-align: left;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-input[type="text"],
-input[type="password"],
-select,
-input[type="number"] {
-    padding: 10px 12px;
-    width: 100%;
-    max-width: 100%;
-    border: 1px solid var(--color-border);
     border-radius: 4px;
-    margin: 0 auto 15px auto;
-    display: block;
 }
 
-input[type="submit"],
-button {
-    padding: 12px 20px;
-    background: var(--color-primary);
-    border: none;
-    color: #fff;
-    border-radius: 4px;
-    cursor: pointer;
-    margin: 20px auto 0 auto;
-    font-size: 16px;
-    transition: background 0.3s ease;
-    display: block;
-}
-
-input[type="submit"]:hover,
-button:hover {
-    background: var(--color-primary-hover);
-}
-
-/* Список учеников */
-ol {
-    background: #f9f9f9;
-    padding: 20px;
-    border-radius: 4px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-    list-style-position: inside;
-    font-size: 18px;
-}
-
-ol li {
-    padding: 10px 0;
-    border-bottom: 1px solid var(--color-border-light);
-}
-
-ol li:last-child {
-    border-bottom: none;
-}
-
-/* Легенда календаря */
-.legend {
-    margin-top: 20px;
-    text-align: center;
-    font-size: 14px;
-    color: var(--color-text-secondary);
-}
-
-.legend .lesson-day {
-    width: 12px;
-    height: 12px;
-    background-color: var(--color-calendar-lesson-day-bg);
-    display: inline-block;
-    margin-right: 5px;
-    border-radius: 50%;
-}
-
-.legend .exam-day {
-    width: 12px;
-    height: 12px;
-    background-color: var(--color-calendar-exam-day-bg);
-    display: inline-block;
-    margin-right: 5px;
-    border-radius: 50%;
-}
-
-/* Стили flatpickr */
-.flatpickr-wrapper {
-    width: 90%;
-    max-width: 300px;
-    margin: 0 auto;
-}
-
-.flatpickr-calendar {
-    border: 1px solid var(--color-border);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    border-radius: 12px;
-    font-family: var(--font-family);
-    background-color: var(--color-calendar-bg);
-}
-
-.flatpickr-months {
-    background-color: var(--color-calendar-header);
-    color: var(--color-text);
-    border-radius: 12px 12px 0 0;
-    padding: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.flatpickr-month {
-    font-size: 18px;
-    font-weight: 600;
-    flex-grow: 1;
-    text-align: center;
-}
-
-.flatpickr-prev-month,
-.flatpickr-next-month {
-    font-size: 22px;
-    padding: 10px;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition: color 0.3s ease;
-}
-
-.flatpickr-prev-month:hover,
-.flatpickr-next-month:hover {
-    color: var(--color-text);
-}
-
-.flatpickr-weekdays {
-    background-color: var(--color-calendar-weekdays);
-    padding: 10px 0;
-    font-weight: bold;
-    font-size: 14px;
-    color: var(--color-text-secondary);
-    border-bottom: 1px solid var(--color-border);
-}
-
-.flatpickr-days {
-    padding: 10px;
-}
-
-.flatpickr-day {
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
-    margin: 5px;
-    font-size: 14px;
-    color: var(--color-text-secondary);
-    text-align: center;
-    border-radius: 8px;
-    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer;
-}
-
-.flatpickr-day:hover {
-    background-color: #f0f0f0;
-    color: var(--color-text);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-}
-
-.flatpickr-day.today {
-    background-color: var(--color-calendar-today-bg) !important;
-    color: var(--color-calendar-today-text) !important;
-    border-radius: 50%;
-    font-weight: bold;
-}
-
-.flatpickr-day.selected {
-    background-color: var(--color-calendar-selected-bg) !important;
-    color: var(--color-calendar-selected-text) !important;
-    border-radius: 50%;
-    font-weight: bold;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.flatpickr-day.lesson-day {
-    background-color: var(--color-calendar-lesson-day-bg) !important;
-    color: var(--color-calendar-lesson-day-text) !important;
-    border-radius: 50%;
-    font-weight: bold;
-}
-
-.flatpickr-day.lesson-day:hover,
-.flatpickr-day.lesson-day.selected {
-    background-color: var(--color-calendar-lesson-day-hover-bg) !important;
-    color: var(--color-calendar-lesson-day-hover-text) !important;
-}
-
-/* Выделение зачетных уроков */
-.flatpickr-day.exam-day {
-    background-color: var(--color-calendar-exam-day-bg) !important;
-    color: var(--color-calendar-exam-day-text) !important;
-    border-radius: 50%;
-    font-weight: bold;
-}
-
-.flatpickr-day.exam-day:hover,
-.flatpickr-day.exam-day.selected {
-    background-color: var(--color-calendar-exam-day-hover-bg) !important;
-    color: var(--color-calendar-exam-day-hover-text) !important;
-}
-
-.flatpickr-day.disabled {
-    color: #ccc !important;
-    background-color: #f9f9f9 !important;
-    cursor: not-allowed;
-}
-
-/* Футер */
-footer {
-    text-align: center;
-    padding: 20px;
-    background: var(--color-bg);
-    position: fixed;
-    width: 100%;
-    bottom: 0;
-    color: var(--color-text-secondary);
-}
-
-/* Стили для таблицы в admin.php */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-table th,
-table td {
-    padding: 12px;
-    border-bottom: 1px solid var(--color-border-light);
-    text-align: center;
-}
-
-table th {
-    background-color: var(--color-calendar-weekdays);
-    color: var(--color-text);
-    font-weight: bold;
-}
-
-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-table tr:hover {
-    background-color: #f1f1f1;
-}
-
-input[type="checkbox"] {
-    transform: scale(1.2);
-}
-
-/* Дополнительные стили */
-
-/* Горизонтальное центрирование контейнера */
-.container {
-    width: 80%;
-    max-width: 800px;
-    margin: 100px auto 60px auto; /* Увеличен верхний отступ для учета увеличенной шапки */
-    background: var(--color-bg-content);
-    padding: 30px 40px;
-    border-radius: 12px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-}
-
-/* Заголовки */
-h1 {
-    color: var(--color-text);
-    text-align: center;
-    font-size: 28px;
-    margin-bottom: 20px;
-}
-
-h2 {
-    color: var(--color-text);
-    font-size: 22px;
-    margin-top: 20px;
-    margin-bottom: 15px;
-}
-
-/* Кнопки и ссылки */
-a {
-    color: var(--color-primary);
-}
-
-a:hover {
-    color: var(--color-primary-hover);
-}
-
-.user-menu a i {
-    margin-right: 8px;
-}
-
-/* Иконки Font Awesome */
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
-
-/* Прокрутка для выпадающего меню */
-.dropdown-content {
-    overflow-y: auto;
-    max-height: 300px;
-}
-
-/* Стили для ошибок и уведомлений */
 .errors ul {
     list-style-type: none;
     padding-left: 0;
@@ -534,6 +34,13 @@ a:hover {
 
 .errors li {
     margin-bottom: 5px;
+}
+
+/* Стили для сообщений пользователю */
+.user-alert {
+    font-weight: bold;
+    text-align: center;
+    margin-top: 20px;
 }
 
 /* Стили для профиля пользователя */
@@ -546,172 +53,165 @@ a:hover {
     font-size: 18px;
 }
 
-.profile-form {
-    max-width: 500px;
-    margin: 0 auto;
-}
-
-.profile-form .form-group label {
-    font-size: 16px;
-}
-
-.profile-form input[type="text"],
-.profile-form input[type="password"],
-.profile-form select,
-.profile-form input[type="number"] {
-    padding: 10px;
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    width: 100%;
-    box-sizing: border-box;
-    margin-bottom: 15px;
-    font-size: 16px;
-}
-
-.profile-form input[type="submit"] {
-    background-color: var(--color-primary);
-    color: #fff;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    font-size: 16px;
-}
-
-.profile-form input[type="submit"]:hover {
-    background-color: var(--color-primary-hover);
-}
-
-/* Стили для контейнера токена */
-.key-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-/* Стили для поля токена */
-.key-container input {
-    flex: 1;
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-}
-
 /* Стили для кнопки копирования */
 .copy-button {
-    padding: 10px 15px;
-    background-color: var(--color-primary);
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+/* Стили для таблицы в admin.php */
+.admin-table {
+    width: 100%;
+}
+
+/* Стили для легенды календаря */
+.legend {
+    margin-top: 20px;
+    text-align: center;
     font-size: 14px;
 }
 
-.copy-button:hover {
-    background-color: var(--color-primary-hover);
+.legend .lesson-day,
+.legend .exam-day {
+    width: 12px;
+    height: 12px;
+    display: inline-block;
+    margin-right: 5px;
+    border-radius: 50%;
 }
 
-/* Адаптивность */
-@media (max-width: 600px) {
-    /* Увеличиваем размер шапки */
-    header {
-        padding: 25px 20px;
+.legend .lesson-day {
+    background-color: #a5d6a7;
+}
+
+.legend .exam-day {
+    background-color: #f8bbd0;
+}
+
+/* Стили для Flatpickr */
+.flatpickr-day.today {
+    background-color: #cce5ff !important;
+    color: #0056b3 !important;
+}
+
+.flatpickr-day.selected {
+    background-color: #0056b3 !important;
+    color: #fff !important;
+}
+
+.flatpickr-day.lesson-day {
+    background-color: #a5d6a7 !important;
+    color: #2e7d32 !important;
+}
+
+.flatpickr-day.exam-day {
+    background-color: #f8bbd0 !important;
+    color: #880e4f !important;
+}
+
+/* style.css */
+
+/* Кастомные стили для таблиц */
+.table thead th {
+    background-color: #343a40;
+    color: #fff;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0,0,0,.05);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0,0,0,.075);
+}
+
+/* Стили для списков */
+.list-group-item {
+    font-size: 18px;
+    padding: 15px 20px;
+}
+
+.list-group-item:nth-of-type(odd) {
+    background-color: #f8f9fa;
+}
+
+.list-group-item:nth-of-type(even) {
+    background-color: #e9ecef;
+}
+
+/* Стили для таблиц в admin.php */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th, .admin-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.admin-table th {
+    background-color: #343a40;
+    color: #fff;
+}
+
+.admin-table tr:nth-of-type(even) {
+    background-color: #f8f9fa;
+}
+
+.admin-table tr:hover {
+    background-color: #e9ecef;
+}
+
+/* Стили для кнопок */
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+/* Стили для формы */
+.form-control {
+    border-radius: 0.25rem;
+}
+
+/* Стили для заголовков */
+h1, h2 {
+    font-weight: 700;
+}
+
+/* Улучшение отображения на мобильных устройствах */
+@media (max-width: 576px) {
+    .table-responsive {
+        font-size: 14px;
     }
 
-    .logo a {
-        font-size: 22px;
-    }
-
-    .user-menu a {
-        font-size: 18px;
-    }
-
-    .user-menu a i {
-        font-size: 20px;
-    }
-
-    .user-icon {
-        font-size: 24px;
-    }
-
-    .dropdown-content {
-        min-width: 200px;
-    }
-
-    .dropdown-content a {
-        padding: 16px 20px;
-        font-size: 18px;
-    }
-
-    /* Центрирование форм и элементов */
-    form {
-        width: 100%;
-        padding: 0 10px;
-    }
-
-    input[type="text"],
-    input[type="password"],
-    select,
-    input[type="number"] {
-        max-width: 100%;
-    }
-
-    .container {
-        width: 100%;
-        padding: 20px 10px;
-        overflow-x: auto; /* Добавлено для горизонтальной прокрутки */
-    }
-
-    table th,
-    table td {
-        padding: 8px;
-    }
-
-    .profile-section {
-        padding: 10px;
-    }
-
-    .profile-info p {
+    .list-group-item {
         font-size: 16px;
+        padding: 10px 15px;
     }
-
-    .profile-form {
-        width: 100%;
-    }
-
-    .profile-form .form-group {
-        margin-bottom: 15px;
-    }
-
-    table.admin-table td:first-child {
-        width: 40%; /* Устанавливаем желаемую ширину для столбца ФИО */
-        text-align: left; /* Выравниваем текст по левому краю */
-    }
-    
-    table.admin-table td:last-child {
-        width: 15%;
-    }
-    
-    
 }
 
-/* Стили для горизонтальной прокрутки таблицы */
-.container {
-    overflow-x: auto;
+.numbered-list {
+    counter-reset: list-counter;
 }
 
-/*Новые стили для увеличения ширины поля ФИО в admin.php*/
-
-table.admin-table td:first-child {
-    width: 40%; /* Устанавливаем желаемую ширину для столбца ФИО */
-    text-align: left; /* Выравниваем текст по левому краю */
+.numbered-list .list-group-item {
+    position: relative;
+    padding-left: 50px;
 }
 
-table.admin-table td:last-child {
-    width: 15%;
+.numbered-list .list-group-item::before {
+    counter-increment: list-counter;
+    content: counter(list-counter) ".";
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+    font-size: 18px;
 }
-

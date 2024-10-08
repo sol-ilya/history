@@ -1,10 +1,7 @@
 <?php
-require_once 'config/config.php';
-require_once 'config/functions.php';
-
-require_once 'config/admins_only.php';
-
-
+require_once '../config/config.php';
+require_once '../config/functions.php';
+$pageTitle = 'Управление данными учеников';
 
 // Функция для сохранения данных об учениках в базу данных
 function saveStudents($pdo, $students) {
@@ -30,8 +27,15 @@ function moveToNextLesson($pdo) {
     $stmt->execute();
 }
 
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // Обработка отправленной формы
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        die('Неверный CSRF токен');
+    }
     if (isset($_POST['move_to_next_lesson'])) {
         // Выполняем перенос данных к следующему уроку
         moveToNextLesson($pdo);
@@ -64,61 +68,58 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 // Читаем текущие данные об учениках
 $students = readStudents($pdo);
 ?>
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Консоль администратора</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
+<?php include 'header.php'; ?>
 
-<body>
-    <?php include 'config/header.php'; ?>
-    <div class="container">
-        <h1>Консоль администратора</h1>
-        <?php if (isset($message)): ?>
-            <p class="success"><?php echo htmlspecialchars($message); ?></p>
-        <?php endif; ?>
+<h1 class="mb-4">Управление данными учеников</h1>
+<?php if (isset($message)): ?>
+    <div class="alert alert-success"><?php echo htmlspecialchars($message); ?></div>
+<?php endif; ?>
 
-        <!-- Кнопка для переноса данных к следующему уроку -->
-        <form method="post" style="margin-bottom: 20px;">
-            <input type="submit" name="move_to_next_lesson" value="Перенести данные к следующему уроку">
-        </form>
+<!-- Кнопка для переноса данных к следующему уроку -->
+<form method="post" class="mb-4">
+    <button type="submit" name="move_to_next_lesson" class="btn btn-warning">Перенести данные к следующему уроку</button>
+</form>
 
-        <!-- Форма для редактирования данных учеников -->
-        <form method="post">
-            <table class="admin-table">
+<!-- Форма для редактирования данных учеников -->
+<form method="post">
+    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+    <input type="hidden" name="students[<?php echo $index; ?>][id]" value="<?php echo $student['id']; ?>">
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover admin-table">
+            <thead class="thead-dark">
                 <tr>
-                    <th>ФИО</th>
-                    <th>Прошлый урок</th>
-                    <th>Этот урок</th>
+                    <th style="width: 40%;">ФИО</th>
+                    <th style="width: 20%;">Прошлый урок</th>
+                    <th style="width: 20%;">Этот урок</th>
                     <th>Количество оценок</th>
                 </tr>
+            </thead>
+            <tbody>
                 <?php foreach ($students as $index => $student): ?>
                     <tr>
                         <td>
-                            <!-- Добавляем скрытое поле ID -->
                             <input type="hidden" name="students[<?php echo $index; ?>][id]" value="<?php echo $student['id']; ?>">
-                            <input type="text" name="students[<?php echo $index; ?>][name]" value="<?php echo htmlspecialchars($student['name']); ?>" required>
+                            <input type="text" name="students[<?php echo $index; ?>][name]" class="form-control" value="<?php echo htmlspecialchars($student['name']); ?>" required>
                         </td>
-                        <td>
+                        <td class="text-center">
                             <input type="checkbox" name="students[<?php echo $index; ?>][wasPresentBefore]" <?php if ($student['was_present_before']) echo 'checked'; ?>>
                         </td>
-                        <td>
+                        <td class="text-center">
                             <input type="checkbox" name="students[<?php echo $index; ?>][isPresentNow]" <?php if ($student['is_present_now']) echo 'checked'; ?>>
                         </td>
                         <td>
-                            <input type="number" name="students[<?php echo $index; ?>][marks]" value="<?php echo $student['marks']; ?>" min="0">
+                            <input type="number" name="students[<?php echo $index; ?>][marks]" class="form-control" value="<?php echo $student['marks']; ?>" min="0">
                         </td>
                     </tr>
                 <?php endforeach; ?>
-            </table>
-            <input type="submit" value="Сохранить">
-        </form>
+            </tbody>
+        </table>
     </div>
-    <?php include 'config/footer.php'; ?>
-    <script src="js/dropdownToggle.js"></script>
-</body>
-</html>
+
+    <button type="submit" name="update_type" class="btn btn-primary ml-2">
+        <i class="fas fa-save"></i> Сохранить
+    </button>
+</form>
+
+
+<?php include 'footer.php'; ?>

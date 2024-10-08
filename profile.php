@@ -123,122 +123,106 @@ if (isset($_SESSION['success_key'])) {
     unset($_SESSION['success_key']);
 }
 ?>
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Профиль</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Подключение Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <?php include 'config/header.php'; ?>
-    <div class="container">
-        <h1>Профиль</h1>
 
-        <!-- Сообщения об успехе -->
-        <?php if ($success): ?>
-            <p class="success"><?php echo $success; ?></p>
-        <?php endif; ?>
-        <?php if ($success_password): ?>
-            <p class="success"><?php echo $success_password; ?></p>
-        <?php endif; ?>
-        <?php if ($success_key): ?>
-            <p class="success success_key"><?php echo $success_key; ?></p>
-        <?php endif; ?>
+<?php include 'config/header.php'; ?>
 
-        <!-- Сообщения об ошибках -->
-        <?php if (!empty($errors)): ?>
-            <div class="errors">
-                <ul>
-                    <?php foreach ($errors as $error): ?>
-                        <li><?php echo $error; ?></li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-        <?php endif; ?>
+<div class="container container-custom">
+    <h1 class="mb-4">Профиль</h1>
 
-        <!-- Информация о пользователе -->
-        <div class="profile-section">
-            <h2>Основная информация</h2>
-            <div class="profile-info">
-                <p><strong>ФИО:</strong> <?php echo $user['name']; ?></p>
-                <p><strong>Имя пользователя:</strong> <?php echo $user['username']; ?></p>
-            </div>
+    <!-- Сообщения об успехе -->
+    <?php if ($success): ?>
+        <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
+    <?php endif; ?>
+    <?php if ($success_password): ?>
+        <div class="alert alert-success"><?php echo htmlspecialchars($success_password); ?></div>
+    <?php endif; ?>
+    <?php if ($success_key): ?>
+        <div class="alert alert-success"><?php echo htmlspecialchars($success_key); ?></div>
+    <?php endif; ?>
+
+    <!-- Сообщения об ошибках -->
+    <?php if (!empty($errors)): ?>
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                <?php foreach ($errors as $error): ?>
+                    <li><?php echo htmlspecialchars($error); ?></li>
+                <?php endforeach; ?>
+            </ul>
         </div>
+    <?php endif; ?>
 
-        <!-- Форма для обновления профиля -->
-        <div class="profile-section">
-            <h2>Редактировать профиль</h2>
-            <form method="post" class="profile-form">
-                <input type="hidden" name="update_profile" value="1">
-                <div class="form-group">
-                    <label for="nickname">Никнейм:</label>
-                    <input type="text" id="nickname" name="nickname" 
-                            placeholder="Мой ник" value="<?php echo $user['nickname'] ?? ''; ?>">
-                </div>
-
-                <div class="form-group">
-                    <label for="telegram">Telegram:</label>
-                    <input type="text" id="telegram" name="telegram" 
-                            placeholder="@telegram_username" value="<?php echo $user['telegram'] ?? ''; ?>">
-                </div>
-
-                <input type="submit" value="Сохранить изменения">
-            </form>
-        </div>
-
-        <!-- Форма для изменения пароля -->
-        <div class="profile-section">
-            <h2>Изменить пароль</h2>
-            <form method="post" class="profile-form">
-                <input type="hidden" name="change_password" value="1">
-                <div class="form-group">
-                    <label for="current_password">Текущий пароль:</label>
-                    <input type="password" id="current_password" name="current_password" required>
-                    <i class="fa-solid fa-eye toggle-password"></i>
-                </div>
-
-                <div class="form-group">
-                    <label for="new_password">Новый пароль:</label>
-                    <input type="password" id="new_password" name="new_password" autocomplete="new-password" required>
-                    <i class="fa-solid fa-eye toggle-password"></i>
-                </div>
-
-                <div class="form-group">
-                    <label for="confirm_password">Подтвердите новый пароль:</label>
-                    <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required>
-                    <i class="fa-solid fa-eye toggle-password"></i>
-                </div>
-
-                <input type="submit" value="Изменить пароль">
-            </form>
-        </div>
-
-        <!-- Форма для генерации API-ключа -->
-        <div class="profile-section" id="api-key-section">
-            <h2>Управление API-ключом</h2>
-            <form method="post" class="profile-form">
-                <input type="hidden" name="generate_key" value="1">
-                <div class="form-group">
-                    <label for="api_key">Ваш API-ключ:</label>
-                    <div class="key-container">
-                        <input type="text" id="api_key" value="<?php echo $user['api_key'] ?? 'Не сгенерирован'; ?>" readonly>
-                        <?php if ($user['api_key']): ?>
-                            <button type="button" id="copy_key" class="copy-button">Скопировать</button>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <input type="submit" value="Сгенерировать новый ключ">
-            </form>
+    <!-- Информация о пользователе -->
+    <div class="profile-section">
+        <h2>Основная информация</h2>
+        <div class="profile-info">
+            <p><strong>ФИО:</strong> <?php echo htmlspecialchars($user['name']); ?></p>
+            <p><strong>Имя пользователя:</strong> <?php echo htmlspecialchars($user['username']); ?></p>
         </div>
     </div>
-    <?php include 'config/footer.php'; ?>
 
-    <!-- Подключение внешнего JavaScript-файла -->
-    <script src="js/togglePassword.js"></script>
-    <script src="js/copyKey.js"></script>
-</body>
-</html>
+    <!-- Форма для обновления профиля -->
+    <div class="profile-section">
+        <h2>Редактировать профиль</h2>
+        <form method="post" class="mx-auto" style="max-width: 500px;">
+            <input type="hidden" name="update_profile" value="1">
+            <div class="form-group">
+                <label for="nickname">Никнейм:</label>
+                <input type="text" id="nickname" name="nickname" class="form-control"
+                        placeholder="Мой ник" value="<?php echo htmlspecialchars($user['nickname'] ?? ''); ?>">
+            </div>
+
+            <div class="form-group">
+                <label for="telegram">Telegram:</label>
+                <input type="text" id="telegram" name="telegram" class="form-control"
+                        placeholder="@telegram_username" value="<?php echo htmlspecialchars($user['telegram'] ?? ''); ?>">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+        </form>
+    </div>
+
+    <!-- Форма для изменения пароля -->
+    <div class="profile-section">
+        <h2>Изменить пароль</h2>
+        <form method="post" class="mx-auto" style="max-width: 500px;">
+            <input type="hidden" name="change_password" value="1">
+            <div class="form-group position-relative">
+                <label for="current_password">Текущий пароль:</label>
+                <input type="password" id="current_password" name="current_password" class="form-control" required>
+                <i class="fa-solid fa-eye toggle-password position-absolute" style="top: 38px; right: 10px; cursor: pointer;"></i>
+            </div>
+
+            <div class="form-group position-relative">
+                <label for="new_password">Новый пароль:</label>
+                <input type="password" id="new_password" name="new_password" class="form-control" autocomplete="new-password" required>
+                <i class="fa-solid fa-eye toggle-password position-absolute" style="top: 38px; right: 10px; cursor: pointer;"></i>
+            </div>
+
+            <div class="form-group position-relative">
+                <label for="confirm_password">Подтвердите новый пароль:</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-control" autocomplete="new-password" required>
+                <i class="fa-solid fa-eye toggle-password position-absolute" style="top: 38px; right: 10px; cursor: pointer;"></i>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Изменить пароль</button>
+        </form>
+    </div>
+
+    <!-- Форма для генерации API-ключа -->
+    <div class="profile-section" id="api-key-section">
+        <h2>Управление API-ключом</h2>
+        <form method="post" class="mx-auto" style="max-width: 500px;">
+            <input type="hidden" name="generate_key" value="1">
+            <div class="form-group">
+                <label for="api_key">Ваш API-ключ:</label>
+                <input type="text" id="api_key" class="form-control" value="<?php echo htmlspecialchars($user['api_key'] ?? 'Не сгенерирован'); ?>" readonly>
+                <?php if ($user['api_key']): ?>
+                    <button type="button" id="copy_key" class="btn btn-secondary copy-button">Скопировать</button>
+                <?php endif; ?>
+            </div>
+            <button type="submit" class="btn btn-primary">Сгенерировать новый ключ</button>
+        </form>
+    </div>
+</div>
+
+<?php include 'config/footer.php'; ?>
