@@ -48,9 +48,11 @@ function sanitizeString($string) {
     return $string;
 }
 
+function selectStudentByDefault($index, $students) {
+    return $students[$index]['is_present_now'] && $students[$index]['was_present_before'] && $students[$index]['marks'] == 0;
+}
 
-// Остальные функции (calculateOrderExam, calculateOrderLesson) остаются без изменений
-function calculateOrderExam($students, $day) {
+function calculateExamOrder($students, $day) {
     $quantity = count($students);
     $index = ($day - 1) % $quantity;
     $order = [];
@@ -70,16 +72,15 @@ function calculateOrderExam($students, $day) {
     return $order;
 }
 
-function calculateOrderLesson($students, $day, $n = 10) {
+function calculateLessonOrder($students, $day, $n = 10, $selectionFunction = 'selectStudentByDefault') {
     $quantity = count($students);
     $index = ($day - 1) % $quantity;
     $order = [];
     $selectedIndices = [];
     while (count($order) < $n && count($selectedIndices) < $quantity) {
-        $student = $students[$index];
         if (!in_array($index, $selectedIndices)) {
-            if ($student['is_present_now'] && $student['was_present_before'] && $student['marks'] == 0)
-                $order[] = $student;
+            if ($selectionFunction($index, $students))
+                $order[] =  $students[$index];
             $selectedIndices[] = $index;
             $index = ($index + $day) % $quantity;
         } else {
@@ -89,4 +90,52 @@ function calculateOrderLesson($students, $day, $n = 10) {
     return $order;
 }
 
+function getLessons($pdo) {
+    $stmt = $pdo->query('SELECT lesson_date, lesson_type FROM lesson_dates');
+    $lessonDatesData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $lessons = [];
+    foreach ($lessonDatesData as $lesson) {
+        $lessons[$lesson['lesson_date']] = $lesson['lesson_type'];
+    }
+
+    return $lessons;
+}
+
+function getOrder($pdo, $date = null, $type = null) {
+    $date = $date ?? getNextLessonDate($pdo);
+
+    if(!validateDate($date)) {
+        throw new Exception('Некорректная дата');
+    }
+
+    $lessons = getLessons($pdo);
+
+    
+    $type = $type ?? $lessons[$date] ?? null;
+
+    if(is_null($type)) {
+        throw new Exception('На выбранную дату уроки не запланированы');
+    }
+
+    $students = readStudents($pdo);
+    $day = (int)date('d', strtotime($date));
+
+    switch($type) {
+        case 'lesson':
+            return [
+                'date' => $date,
+                'type' => 'lesson', 
+                'order' => calculateLessonOrder($students, $day) 
+            ];
+        case 'exam':
+            return [
+                'date' => $date,
+                'type' => 'exam',
+                'order' => calculateExamOrder($students, $day) 
+            ];
+        default:
+            throw new Exception('Некорректный тип урока');
+    }
+}
 ?>

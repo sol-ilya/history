@@ -3,18 +3,16 @@ require_once 'config/config.php';
 require_once 'config/functions.php';
 
 // Получение всех дат уроков с типом урока
-$stmt = $pdo->query('SELECT lesson_date, lesson_type FROM lesson_dates');
-$lessonDatesData = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+$lessons = getLessons($pdo);
 // Преобразуем в формат, удобный для JavaScript
 $lessonDates = [];
 $examDates = [];
-foreach ($lessonDatesData as $entry) {
-    $lessonDates[] = $entry['lesson_date'];
-    if ($entry['lesson_type'] == 'exam') {
-        $examDates[] = $entry['lesson_date'];
-    }
+foreach ($lessons as $date => $type) {
+    $lessonDates[] = $date;
+    if ($type == 'exam')
+        $examDates[] = $date;
 }
+
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $selectedDate = $_POST['date'];
@@ -24,48 +22,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $algorithm = 'auto';
 }
 
-// Проверка корректности даты
-if (!validateDate($selectedDate, 'Y-m-d')) {
-    $selectedDate = getNextLessonDate($pdo);
+$lesson_type = null;
+switch($algorithm) {
+    case 'auto':
+        break;
+    case 'lesson':
+    case 'exam':
+        $lesson_type = $algorithm;
+        break;
+    default:
+        die('Некорректный алгоритм');
 }
 
-// Если выбран алгоритм 'auto', определяем алгоритм на основе типа урока
-if ($algorithm == 'auto') {
-    // Получаем тип урока из базы данных
-    $stmt = $pdo->prepare('SELECT lesson_type FROM lesson_dates WHERE lesson_date = ?');
-    $stmt->execute([$selectedDate]);
-    $lessonType = $stmt->fetchColumn();
-
-    if ($lessonType == 'exam') {
-        $algorithm = 'exam';
-    } else {
-        $algorithm = 'lesson';
-    }
-}
-
-// Получаем день месяца из выбранной даты
-$day = (int)date('d', strtotime($selectedDate));
-
-// Читаем данные об учениках
-$students = readStudents($pdo);
-$quantity = count($students);
-
-// Инициализация переменной для сообщения
-$user_message = '';
-
-if ($quantity > 0) {
-    if ($algorithm == 'exam') {
-        $order = calculateOrderExam($students, $day);
-    } else {
-        $order = calculateOrderLesson($students, $day);
-    }
-} else {
-    echo "<p>Не удалось вычислить порядок, так как список учеников пуст.</p>";
-    $order = [];
+try {
+    $result = getOrder($pdo, $selectedDate, $lesson_type);
+    $order = $result['order'];
+    $lesson_type = $result['type'];
+} catch(Exception $e) {
+    die('Ошибка при вычислении порядка');
 }
 
 // Проверка, находится ли пользователь в списке
-if (isLoggedIn() && $algorithm == 'lesson') {
+if (isLoggedIn() && $lesson_type == 'lesson') {
     if (in_array($_SESSION['user_id'], array_column($order, 'user_id'))){
         $user_message = '<p class="user-alert text-danger">Возможно Вас спросят.</p>';
     } else {
@@ -85,10 +63,10 @@ if (isLoggedIn() && $algorithm == 'lesson') {
                 <input type="text" id="date" name="date" class="form-control" value="<?php echo htmlspecialchars($selectedDate); ?>" required>
             </div>
             <div class="col-md-6 mb-3">
-                <label for="algorithm" class="form-label">Выберите алгоритм:</label>
+                <label for="algorithm" class="form-label">Выберите тип урока:</label>
                 <select id="algorithm" name="algorithm" class="form-select">
-                    <option value="auto" <?php if ($algorithm == 'auto') echo 'selected'; ?>>Авто</option>
-                    <option value="lesson" <?php if ($algorithm == 'lesson') echo 'selected'; ?>>Работа на уроке</option>
+                    <option value="auto" <?php if ($algorithm == 'auto') echo 'selected'; ?>>Определить автоматически</option>
+                    <option value="lesson" <?php if ($algorithm == 'lesson') echo 'selected'; ?>>Обычный урок</option>
                     <option value="exam" <?php if ($algorithm == 'exam') echo 'selected'; ?>>Зачет</option>
                 </select>
             </div>
@@ -101,7 +79,8 @@ if (isLoggedIn() && $algorithm == 'lesson') {
     <?php endif; ?>
 
     <?php if (!empty($order)): ?>
-        <h2>Порядок ответов на дату <?php echo date('d.m.Y', strtotime($selectedDate)); ?>:</h2>
+        <h2>Порядок ответов на 
+            <?php echo ($lesson_type == 'exam' ? 'зачет ' : 'урок ') . date('d.m.Y', strtotime($selectedDate)); ?>:</h2>
         <ul class="list-group mt-3 numbered-list">
             <?php foreach ($order as $student): ?>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
