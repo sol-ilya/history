@@ -14,9 +14,30 @@
     /* Дополнительные переменные */
     --bs-link-color: #ff9800;
     --bs-link-hover-color: #fb8c00;
+
+    /* Новые переменные для текстов и фонов */
+    --bs-success-text: #155724;
+    --bs-success-bg: #d4edda;
+    --bs-success-border: #c3e6cb;
+
+    --bs-danger-text: #721c24;
+    --bs-danger-bg: #f8d7da;
+    --bs-danger-border: #f5c6cb;
+
+    --bs-info-text: #0c5460;
+    --bs-info-bg: #d1ecf1;
+
+    --bs-body-color: #212529;
+
+    /* Новые переменные для состояний */
+    --bs-focus-ring-color: rgba(255, 152, 0, 0.25); /* rgba от вашего --bs-primary */
 }
 
-/* Кастомные стили, если они необходимы */
+/* Общие стили */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--bs-body-color);
+}
 
 /* Центрирование контейнера */
 .container-custom {
@@ -25,31 +46,20 @@
 }
 
 /* Сообщения об успехе и ошибках */
-.success {
-    color: #155724;
-    background-color: #d4edda;
-    border-color: #c3e6cb;
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 4px;
+.alert-success {
+    color: var(--bs-success-text);
+    background-color: var(--bs-success-bg);
+    border-color: var(--bs-success-border);
 }
 
-.errors {
-    color: #721c24;
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 4px;
+.alert-danger {
+    color: var(--bs-danger-text);
+    background-color: var(--bs-danger-bg);
+    border-color: var(--bs-danger-border);
 }
 
-.errors ul {
-    list-style-type: none;
-    padding-left: 0;
-}
-
-.errors li {
-    margin-bottom: 5px;
+.alert {
+    transition: background-color 0.3s, color 0.3s;
 }
 
 /* Стили для сообщений пользователю */
@@ -74,9 +84,30 @@
     margin-top: 10px;
 }
 
-/* Стили для таблицы в admin.php */
+/* Стили для таблицы */
 .admin-table {
     width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.admin-table th {
+    background-color: var(--bs-dark);
+    color: #fff;
+}
+
+.admin-table tr:nth-of-type(even) {
+    background-color: var(--bs-light);
+}
+
+.admin-table tr:hover {
+    background-color: #e9ecef;
 }
 
 /* Стили для легенды календаря */
@@ -105,12 +136,12 @@
 
 /* Стили для Flatpickr */
 .flatpickr-day.today {
-    background-color: #cce5ff !important;
-    color: #0056b3 !important;
+    background-color: var(--bs-info-bg) !important;
+    color: var(--bs-info-text) !important;
 }
 
 .flatpickr-day.selected {
-    background-color: #0056b3 !important;
+    background-color: var(--bs-primary) !important;
     color: #fff !important;
 }
 
@@ -131,11 +162,11 @@
 }
 
 .table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(0,0,0,.05);
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .table-hover tbody tr:hover {
-    background-color: rgba(0,0,0,.075);
+    background-color: rgba(0, 0, 0, 0.075);
 }
 
 /* Стили для списков */
@@ -145,35 +176,10 @@
 }
 
 .list-group-item:nth-of-type(odd) {
-    background-color: #f8f9fa;
+    background-color: var(--bs-light);
 }
 
 .list-group-item:nth-of-type(even) {
-    background-color: #e9ecef;
-}
-
-/* Стили для таблиц в admin.php */
-.admin-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.admin-table th, .admin-table td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.admin-table th {
-    background-color: var(--bs-dark);
-    color: #fff;
-}
-
-.admin-table tr:nth-of-type(even) {
-    background-color: #f8f9fa;
-}
-
-.admin-table tr:hover {
     background-color: #e9ecef;
 }
 
@@ -181,6 +187,7 @@
 .btn-primary {
     background-color: var(--bs-primary);
     border-color: var(--bs-primary);
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
 .btn-primary:hover,
@@ -206,14 +213,62 @@
     outline: none;
 }
 
+/* Стили ссылок */
+a {
+    color: var(--bs-link-color);
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: var(--bs-link-hover-color);
+}
+
+/* Стили навигации */
+.navbar {
+    background-color: var(--bs-dark);
+}
+
+.navbar .nav-link {
+    color: var(--bs-light);
+    transition: color 0.3s;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link:focus {
+    color: var(--bs-primary);
+}
+
+/* Стили для активного пункта меню в профиле */
+.dropdown-menu .dropdown-item:focus,
+.dropdown-menu .dropdown-item:hover {
+    color: var(--bs-primary);
+    background-color: var(--bs-light);
+}
+
 /* Стили для формы */
 .form-control {
     border-radius: 0.25rem;
 }
 
-/* Стили для заголовков */
-h1, h2 {
+.form-control:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem var(--bs-focus-ring-color);
+}
+
+/* Стили для селектов */
+.form-select:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem var(--bs-focus-ring-color);
+}
+
+/* Стили для заголовков и текста */
+h1, h2, h3 {
     font-weight: 700;
+    color: var(--bs-dark);
+}
+
+p {
+    color: var(--bs-body-color);
 }
 
 /* Улучшение отображения на мобильных устройствах */
@@ -228,6 +283,7 @@ h1, h2 {
     }
 }
 
+/* Нумерованные списки */
 .numbered-list {
     counter-reset: list-counter;
 }
@@ -246,4 +302,30 @@ h1, h2 {
     transform: translateY(-50%);
     font-weight: bold;
     font-size: 18px;
+}
+
+/* Транзишены для интерактивных элементов */
+.btn, a {
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Убираем синий цвет при выделении ссылок в Firefox */
+a:focus {
+    outline: none;
+}
+
+/* Изменение цвета чекбоксов и радиокнопок */
+.form-check-input:checked {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+/* Стили для переключателей в профиле */
+.toggle-password {
+    color: var(--bs-body-color);
+    transition: color 0.3s;
+}
+
+.toggle-password:hover {
+    color: var(--bs-primary);
 }
