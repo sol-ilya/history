@@ -151,8 +151,10 @@ function handleOrder($method, $resource, $segments, $pdo) {
             break;
     }
 
+    
     try {
-        $result = getOrder($pdo, $dateParam, $type);
+        $manager = new OrderManager($pdo);
+        $result = $manager->getOrder($dateParam, $type);
     } catch (Exception $e) {
         respondWithError($e->getMessage(), 400);
     }
