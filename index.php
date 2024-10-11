@@ -2,8 +2,11 @@
 require_once 'config/config.php';
 require_once 'config/functions.php';
 
+$manager = new OrderManager($pdo);
+
+
 // Получение всех дат уроков с типом урока
-$lessons = getLessons($pdo);
+$lessons = $manager->getLessons();
 // Преобразуем в формат, удобный для JavaScript
 $lessonDates = [];
 $examDates = [];
@@ -18,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $selectedDate = $_POST['date'];
     $algorithm = $_POST['algorithm'];
 } else {
-    $selectedDate = getNextLessonDate($pdo);
+    $selectedDate = null;
     $algorithm = 'auto';
 }
 
@@ -35,7 +38,8 @@ switch($algorithm) {
 }
 
 try {
-    $result = getOrder($pdo, $selectedDate, $lesson_type);
+    $result = $manager->getOrder($selectedDate, $lesson_type);
+    $selectedDate = $result['date'];
     $order = $result['order'];
     $lesson_type = $result['type'];
 } catch(Exception $e) {
