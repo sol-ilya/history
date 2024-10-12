@@ -4,27 +4,22 @@ require_once '../config/functions.php';
 $pageTitle = 'Управление данными учеников';
 
 // Функция для сохранения данных об учениках в базу данных
-function saveStudents($pdo, $students) {
+function saveStudents($db, $students) {
     foreach ($students as $student) {
         if (isset($student['id'])) {
             // Обновляем данные ученика
-            $stmt = $pdo->prepare('UPDATE students SET name = ?, was_present_before = ?, is_present_now = ?, marks = ? WHERE id = ?');
-            $stmt->execute([
-                $student['name'],
-                $student['wasPresentBefore'] ? 1 : 0,
-                $student['isPresentNow'] ? 1 : 0,
-                (int)$student['marks'],
-                $student['id']
-            ]);
+            $db->execute(
+                'UPDATE students SET name = ?, was_present_before = ?, is_present_now = ?, marks = ? WHERE id = ?',
+                [
+                    $student['name'],
+                    $student['wasPresentBefore'] ? 1 : 0,
+                    $student['isPresentNow'] ? 1 : 0,
+                    (int)$student['marks'],
+                    $student['id']
+                ]
+            );
         }
     }
-}
-
-// Функция для переноса данных к следующему уроку
-function moveToNextLesson($pdo) {
-    // Переносим данные: isPresentNow -> was_present_before, is_present_now устанавливаем в true
-    $stmt = $pdo->prepare('UPDATE students SET was_present_before = is_present_now, is_present_now = 1');
-    $stmt->execute();
 }
 
 if (empty($_SESSION['csrf_token'])) {
@@ -38,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     if (isset($_POST['move_to_next_lesson'])) {
         // Выполняем перенос данных к следующему уроку
-        moveToNextLesson($pdo);
+        $db->moveDataToNextLesson();
         $message = "Данные успешно перенесены к следующему уроку.";
     } else {
         // Обновление данных учеников через форму
@@ -57,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
         if (!empty($updatedStudents)) {
-            saveStudents($pdo, $updatedStudents);
+            saveStudents($db, $updatedStudents);
             $message = "Данные успешно сохранены.";
         } else {
             $message = "Нет данных для сохранения.";
@@ -66,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // Читаем текущие данные об учениках
-$students = readStudents($pdo);
+$students = $db->getStudents();
 ?>
 <?php include 'header.php'; ?>
 

@@ -2,8 +2,7 @@
 require_once 'config/config.php';
 require_once 'config/functions.php';
 
-$manager = new OrderManager($pdo);
-
+$manager = new OrderManager($db);
 
 // Получение всех дат уроков с типом урока
 $lessons = $manager->getLessons();
@@ -15,7 +14,6 @@ foreach ($lessons as $date => $type) {
     if ($type == 'exam')
         $examDates[] = $date;
 }
-
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $selectedDate = $_POST['date'];

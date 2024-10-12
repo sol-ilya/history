@@ -19,9 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
 
     if (empty($errors)) {
         // Обновление данных
-        $stmt = $pdo->prepare('UPDATE users SET nickname = ?, telegram = ? WHERE id = ?');
         try {
-            $stmt->execute([$nickname ?: null, $telegram ?: null, $user_id]);
+            $db->execute('UPDATE users SET nickname = ?, telegram = ? WHERE id = ?', [$nickname ?: null, $telegram ?: null, $user_id]);
             $_SESSION['success'] = 'Данные успешно обновлены.';
         } catch (PDOException $e) {
             $errors[] = 'Ошибка при обновлении данных: ' . $e->getMessage();
@@ -52,18 +51,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
 
     if (empty($errors)) {
         // Получение текущего хеша пароля из базы данных
-        $stmt = $pdo->prepare('SELECT password_hash FROM users WHERE id = ?');
-        $stmt->execute([$user_id]);
-        $user_password = $stmt->fetchColumn();
+        $user_data = $db->getUserById($user_id, ['password_hash']);
+        $user_password = $user_data['password_hash'];
 
         if ($user_password && password_verify($current_password, $user_password)) {
             // Хеширование нового пароля
             $new_password_hash = password_hash($new_password, PASSWORD_DEFAULT);
 
             // Обновление пароля в базе данных
-            $stmt = $pdo->prepare('UPDATE users SET password_hash = ? WHERE id = ?');
             try {
-                $stmt->execute([$new_password_hash, $user_id]);
+                $db->execute('UPDATE users SET password_hash = ? WHERE id = ?', [$new_password_hash, $user_id]);
                 $_SESSION['success_password'] = 'Пароль успешно изменен.';
             } catch (PDOException $e) {
                 $errors[] = 'Ошибка при изменении пароля: ' . $e->getMessage();
@@ -80,9 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_key'])) {
     $key = bin2hex(random_bytes(16)); // 32-символьный токен
 
     // Обновление токена в базе данных
-    $stmt = $pdo->prepare('UPDATE users SET api_key = ? WHERE id = ?');
     try {
-        $stmt->execute([$key, $user_id]);
+        $db->execute('UPDATE users SET api_key = ? WHERE id = ?', [$key, $user_id]);
         // Установка сообщения успеха
         $_SESSION['success_key'] = 'API-токен успешно сгенерирован.';
         // Редирект с фрагментом
@@ -94,14 +90,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_key'])) {
 }
 
 // Получение текущих данных пользователя вместе с фамилией из таблицы students
-$stmt = $pdo->prepare('
+$user = $db->fetch('
     SELECT u.*, s.name 
     FROM users u 
     JOIN students s ON u.student_id = s.id 
-    WHERE u.id = ?
-');
-$stmt->execute([$user_id]);
-$user = $stmt->fetch();
+    WHERE u.id = ?', [$user_id]);
 
 if (!$user) {
     die('Пользователь не найден.');

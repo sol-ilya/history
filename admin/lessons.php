@@ -24,17 +24,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (validateDate($newDate)) {
             // Проверяем, существует ли уже эта дата
-            $stmt = $pdo->prepare('SELECT COUNT(*) FROM lesson_dates WHERE lesson_date = ?');
-            $stmt->execute([$newDate]);
-            $exists = $stmt->fetchColumn();
+            $exists = $db->fetch('SELECT COUNT(*) AS count FROM lesson_dates WHERE lesson_date = ?', [$newDate])['count'];
 
             if ($exists) {
                 $errors[] = 'Эта дата уже существует.';
             } else {
                 // Добавляем новую дату в базу данных
-                $stmt = $pdo->prepare('INSERT INTO lesson_dates (lesson_date, lesson_type) VALUES (?, ?)');
                 try {
-                    $stmt->execute([$newDate, $lessonType]);
+                    $db->addLessonDate($newDate, $lessonType);
                     $success = 'Дата успешно добавлена.';
                 } catch (PDOException $e) {
                     $errors[] = 'Ошибка при добавлении даты: ' . $e->getMessage();
@@ -50,9 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (validateDate($dateToUpdate)) {
             // Обновляем тип урока в базе данных
-            $stmt = $pdo->prepare('UPDATE lesson_dates SET lesson_type = ? WHERE lesson_date = ?');
             try {
-                $stmt->execute([$newLessonType, $dateToUpdate]);
+                $db->updateLessonType($dateToUpdate, $newLessonType);
                 $success = 'Тип урока успешно обновлён.';
             } catch (PDOException $e) {
                 $errors[] = 'Ошибка при обновлении типа урока: ' . $e->getMessage();
@@ -67,9 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if (isset($_GET['delete_date'])) {
     $dateToDelete = $_GET['delete_date'];
 
-    $stmt = $pdo->prepare('DELETE FROM lesson_dates WHERE lesson_date = ?');
     try {
-        $stmt->execute([$dateToDelete]);
+        $db->deleteLessonDate($dateToDelete);
         $success = 'Дата успешно удалена.';
     } catch (PDOException $e) {
         $errors[] = 'Ошибка при удалении даты: ' . $e->getMessage();
@@ -77,8 +72,7 @@ if (isset($_GET['delete_date'])) {
 }
 
 // Получение всех дат уроков с типом урока
-$stmt = $pdo->query('SELECT lesson_date, lesson_type FROM lesson_dates ORDER BY lesson_date ASC');
-$lessonDates = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$lessonDates = $db->getLessonDates();
 ?>
 
 <?php include 'header.php'; ?>

@@ -6,10 +6,8 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Чтение списка студентов без аккаунтов
-$stmt = $pdo->prepare('SELECT s.id, s.name FROM students s LEFT JOIN users u ON s.id = u.student_id WHERE u.id IS NULL');
-$stmt->execute();
-$available_students = $stmt->fetchAll();
+// Получение списка доступных студентов без аккаунтов
+$available_students = $db->getAvailableStudents();
 
 $errors = [];
 
@@ -44,20 +42,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Проверка существования студента
-    $stmt = $pdo->prepare('SELECT * FROM students s LEFT JOIN users u ON s.id = u.student_id WHERE s.id = ?');
-    $stmt->execute([$student_id]);
-    $student = $stmt->fetch();
+    $student = $db->fetch('SELECT s.*, u.id as user_id FROM students s LEFT JOIN users u ON s.id = u.student_id WHERE s.id = ?', [$student_id]);
 
     if (!$student) {
         $errors[] = 'Выбранный ученик не существует.';
-    } elseif ($student['id']) { // если u.id не NULL
+    } elseif ($student['user_id']) {
         $errors[] = 'Этот ученик уже привязан к аккаунту.';
     }
 
     // Проверка уникальности имени пользователя
-    $stmt = $pdo->prepare('SELECT id FROM users WHERE username = ?');
-    $stmt->execute([$username]);
-    if ($stmt->fetch()) {
+    $existing_user = $db->getUserByUsername($username);
+    if ($existing_user) {
         $errors[] = 'Это имя пользователя уже занято.';
     }
 
@@ -66,28 +61,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
         // Вставка нового пользователя
-        $stmt = $pdo->prepare('INSERT INTO users (id, student_id, username, nickname, telegram, password_hash) VALUES (NULL, ?, ?, ?, ?, ?)');
+        $sql = 'INSERT INTO users (student_id, username, nickname, telegram, password_hash) VALUES (?, ?, ?, ?, ?)';
         try {
-            $stmt->execute([$student_id, $username, $nickname ?: null, $telegram ?: null, $password_hash]);
+            $db->execute($sql, [$student_id, $username, $nickname ?: null, $telegram ?: null, $password_hash]);
 
-            $user_id = $pdo->lastInsertId();
+            $user_id = $db->connect()->lastInsertId();
 
             session_regenerate_id(true);
             $_SESSION['user_id'] = $user_id;
-            
+
             if (isset($_POST['remember_me'])) {
                 // Генерация уникального токена
-                $token = bin2hex(random_bytes(32));
-
-                // Хеширование токена для хранения в базе данных
-                $token_hash = hash('sha256', $token);
-
-                // Установка времени истечения токена (например, 30 дней)
-                $expires_at = date('Y-m-d H:i:s', time() + (86400 * 30));
-
-                // Сохранение токена в базе данных
-                $stmt = $pdo->prepare('INSERT INTO user_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)');
-                $stmt->execute([$user_id, $token_hash, $expires_at]);
+                $token = $db->generateSessionToken($user_id);
 
                 // Установка куки с токеном
                 setcookie('remember_me', $token, [

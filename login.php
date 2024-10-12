@@ -20,30 +20,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Пожалуйста, заполните все поля.';
     } else {
         // Поиск пользователя по имени пользователя
-        $stmt = $pdo->prepare('SELECT id, password_hash, is_admin FROM users WHERE username = ?');
-        $stmt->execute([$username]);
-        $user = $stmt->fetch();
+        $user = $db->getUserByUsername($username, ['password_hash', 'is_admin']);
 
         if ($user && password_verify($password, $user['password_hash'])) {
             // Успешный вход
 
             session_regenerate_id(true);
-            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['is_admin'] = $user['is_admin'];
     
             if (isset($_POST['remember_me'])) {
                 // Генерация уникального токена
-                $token = bin2hex(random_bytes(32));
-    
-                // Хеширование токена для хранения в базе данных
-                $token_hash = hash('sha256', $token);
-    
-                // Установка времени истечения токена (например, 30 дней)
-                $expires_at = date('Y-m-d H:i:s', time() + (86400 * 30));
-    
-                // Сохранение токена в базе данных
-                $stmt = $pdo->prepare('INSERT INTO user_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)');
-                $stmt->execute([$user['id'], $token_hash, $expires_at]);
+                $token = $db->generateSessionToken($user['user_id']);
     
                 // Установка куки с токеном
                 setcookie('remember_me', $token, [
@@ -61,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
             header('Location: /');
-            exit;
+            exit();
         } else {
             $errors[] = 'Неверное имя пользователя или пароль.';
         }

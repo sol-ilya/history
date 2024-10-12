@@ -5,10 +5,7 @@ require_once 'config/config.php';
 // Удаление токена из базы данных
 if (isset($_COOKIE['remember_me'])) {
     $token = $_COOKIE['remember_me'];
-    $token_hash = hash('sha256', $token);
-
-    $stmt = $pdo->prepare('DELETE FROM user_tokens WHERE token_hash = ?');
-    $stmt->execute([$token_hash]);
+    $db->revokeSessionToken($token);
 
     // Удаление куки
     setcookie('remember_me', '', time() - 3600, '/', '', false, true);

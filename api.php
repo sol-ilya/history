@@ -7,15 +7,12 @@ header('Content-Type: application/json; charset=utf-8');
 
 // Подключение к базе данных и необходимые функции
 require_once 'config/db.php';
-require_once 'config/functions.php'; // Подключаем functions.php
+require_once 'config/functions.php';
 date_default_timezone_set('Europe/Moscow');
 
-// Создаём подключение к базе данных
-try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-} catch (PDOException $e) {
-    respondWithError('Ошибка подключения к базе данных: ' . $e->getMessage(), 500);
-}
+// Создаём объект базы данных
+$db = new Database();
+$db->connect();
 
 // Получаем метод запроса
 $method = $_SERVER['REQUEST_METHOD'];
@@ -39,7 +36,7 @@ $apiKey = $headers['X-API-Key'] ?? null;
 // Аутентификация пользователя по API-ключу
 $user = null;
 if ($apiKey) {
-    $user = authenticateByApiKey($pdo, $apiKey);
+    $user = $db->getUserByAPIKey($apiKey, ['is_admin', 'student_id', 'nickname']);
 }
 
 // Обработка запроса в зависимости от ресурса
@@ -55,13 +52,13 @@ switch ($resource) {
             respondWithError('Доступ запрещён. Требуется авторизация администратора.', 401);
         }
         $id = array_shift($segments);
-        handleStudents($method, $id, $user, $pdo);
+        handleStudents($method, $id, $user, $db);
         break;
 
     case 'order':
     case 'lesson-order':
     case 'exam-order':
-        handleOrder($method, $resource, $segments, $pdo);
+        handleOrder($method, $resource, $segments, $db);
         break;
 
     case 'me':
@@ -69,7 +66,7 @@ switch ($resource) {
         if (!$user) {
             respondWithError('Требуется авторизация.', 401);
         }
-        handleMe($method, $user, $pdo);
+        handleMe($method, $user, $db);
         break;
 
     default:
@@ -79,7 +76,7 @@ switch ($resource) {
 
 // Функции обработки запросов
 
-function handleStudents($method, $id, $user, $pdo) {
+function handleStudents($method, $id, $user, $db) {
     // Получение данных из тела запроса
     $input = json_decode(file_get_contents('php://input'), true);
 
@@ -87,16 +84,16 @@ function handleStudents($method, $id, $user, $pdo) {
         case 'GET':
             if ($id) {
                 // Получение информации о конкретном студенте
-                getStudent($pdo, $id);
+                getStudent($db, $id);
             } else {
                 // Получение списка всех студентов
-                getStudents($pdo);
+                getStudents($db);
             }
             break;
 
         case 'POST':
             // Создание нового студента
-            createStudent($pdo, $input);
+            createStudent($db, $input);
             break;
 
         case 'PUT':
@@ -104,7 +101,7 @@ function handleStudents($method, $id, $user, $pdo) {
                 respondWithError('ID студента не указан', 400);
             }
             // Обновление информации о студенте
-            updateStudent($pdo, $id, $input);
+            updateStudent($db, $id, $input);
             break;
 
         case 'DELETE':
@@ -112,7 +109,7 @@ function handleStudents($method, $id, $user, $pdo) {
                 respondWithError('ID студента не указан', 400);
             }
             // Удаление студента
-            deleteStudent($pdo, $id);
+            deleteStudent($db, $id);
             break;
 
         default:
@@ -121,7 +118,7 @@ function handleStudents($method, $id, $user, $pdo) {
     }
 }
 
-function handleOrder($method, $resource, $segments, $pdo) {
+function handleOrder($method, $resource, $segments, $db) {
     if ($method !== 'GET') {
         respondWithError('Метод не поддерживается', 405);
     }
@@ -153,7 +150,7 @@ function handleOrder($method, $resource, $segments, $pdo) {
 
     
     try {
-        $manager = new OrderManager($pdo);
+        $manager = new OrderManager($db);
         $result = $manager->getOrder($dateParam, $type);
     } catch (Exception $e) {
         respondWithError($e->getMessage(), 400);
@@ -165,17 +162,17 @@ function handleOrder($method, $resource, $segments, $pdo) {
     exit();
 }
 
-function handleMe($method, $user, $pdo) {
+function handleMe($method, $user, $db) {
     switch ($method) {
         case 'GET':
             // Возвращаем данные текущего пользователя
-            getCurrentUser($user, $pdo);
+            getCurrentUser($user, $db);
             break;
 
         case 'PUT':
             // Обновляем данные текущего пользователя, кроме поля 'name'
             $input = json_decode(file_get_contents('php://input'), true);
-            updateCurrentUser($pdo, $user, $input);
+            updateCurrentUser($db, $user, $input);
             break;
 
         default:
@@ -186,26 +183,14 @@ function handleMe($method, $user, $pdo) {
 
 // Функции аутентификации и проверки прав
 
-function authenticateByApiKey($pdo, $apiKey) {
-    $stmt = $pdo->prepare('
-        SELECT u.id AS user_id, u.nickname, u.is_admin, u.student_id
-        FROM users u
-        WHERE u.api_key = ?
-    ');
-    $stmt->execute([$apiKey]);
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
-
 function isAdminAPI($user) {
     return isset($user['is_admin']) && $user['is_admin'] == 1;
 }
 
 // Функции обработки студентов
 
-function getStudent($pdo, $id) {
-    $stmt = $pdo->prepare('SELECT s.*, u.nickname FROM students s LEFT JOIN users u ON s.id = u.student_id WHERE s.id = ?');
-    $stmt->execute([$id]);
-    $student = $stmt->fetch(PDO::FETCH_ASSOC);
+function getStudent($db, $id) {
+    $student = $db->fetch('SELECT s.*, u.nickname FROM students s LEFT JOIN users u ON s.id = u.student_id WHERE s.id = ?', [$id]);
     if (!$student) {
         respondWithError('Студент не найден', 404);
     }
@@ -213,13 +198,13 @@ function getStudent($pdo, $id) {
     exit();
 }
 
-function getStudents($pdo) {
-    $students = readStudents($pdo);
+function getStudents($db) {
+    $students = $db->getStudents();
     echo json_encode(['students' => $students]);
     exit();
 }
 
-function createStudent($pdo, $input) {
+function createStudent($db, $input) {
     $name = trim($input['name'] ?? '');
     $was_present_before = isset($input['was_present_before']) ? (int)$input['was_present_before'] : 0;
     $is_present_now = isset($input['is_present_now']) ? (int)$input['is_present_now'] : 0;
@@ -229,10 +214,9 @@ function createStudent($pdo, $input) {
         respondWithError('Имя студента обязательно');
     }
 
-    $stmt = $pdo->prepare('INSERT INTO students (name, was_present_before, is_present_now, marks) VALUES (?, ?, ?, ?)');
     try {
-        $stmt->execute([$name, $was_present_before, $is_present_now, $marks]);
-        $newStudentId = $pdo->lastInsertId();
+        $db->execute('INSERT INTO students (name, was_present_before, is_present_now, marks) VALUES (?, ?, ?, ?)', [$name, $was_present_before, $is_present_now, $marks]);
+        $newStudentId = $db->connect()->lastInsertId();
         http_response_code(201);
         echo json_encode(['message' => 'Студент создан', 'student_id' => $newStudentId]);
         exit();
@@ -241,7 +225,7 @@ function createStudent($pdo, $input) {
     }
 }
 
-function updateStudent($pdo, $id, $input) {
+function updateStudent($db, $id, $input) {
     $fields = [];
     $values = [];
 
@@ -269,9 +253,8 @@ function updateStudent($pdo, $id, $input) {
     $values[] = $id;
     $sql = 'UPDATE students SET ' . implode(', ', $fields) . ' WHERE id = ?';
 
-    $stmt = $pdo->prepare($sql);
     try {
-        $stmt->execute($values);
+        $db->execute($sql, $values);
         echo json_encode(['message' => 'Данные студента обновлены']);
         exit();
     } catch (PDOException $e) {
@@ -279,10 +262,9 @@ function updateStudent($pdo, $id, $input) {
     }
 }
 
-function deleteStudent($pdo, $id) {
-    $stmt = $pdo->prepare('DELETE FROM students WHERE id = ?');
+function deleteStudent($db, $id) {
     try {
-        $stmt->execute([$id]);
+        $db->execute('DELETE FROM students WHERE id = ?', [$id]);
         echo json_encode(['message' => 'Студент удалён']);
         exit();
     } catch (PDOException $e) {
@@ -292,22 +274,19 @@ function deleteStudent($pdo, $id) {
 
 // Функции для /api/me
 
-function getCurrentUser($user, $pdo) {
+function getCurrentUser($user, $db) {
     // Получаем полную информацию о пользователе
-    $stmt = $pdo->prepare('
+    $userData = $db->fetch('
         SELECT u.id AS user_id, u.nickname, u.is_admin, s.*
         FROM users u
         LEFT JOIN students s ON u.student_id = s.id
-        WHERE u.id = ?
-    ');
-    $stmt->execute([$user['user_id']]);
-    $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+        WHERE u.id = ?', [$user['user_id']]);
 
     echo json_encode(['user' => $userData]);
     exit();
 }
 
-function updateCurrentUser($pdo, $user, $input) {
+function updateCurrentUser($db, $user, $input) {
     $fields = [];
     $values = [];
 
@@ -332,9 +311,8 @@ function updateCurrentUser($pdo, $user, $input) {
     $values[] = $user['student_id'];
     $sql = 'UPDATE students SET ' . implode(', ', $fields) . ' WHERE id = ?';
 
-    $stmt = $pdo->prepare($sql);
     try {
-        $stmt->execute($values);
+        $db->execute($sql, $values);
         echo json_encode(['message' => 'Ваши данные обновлены']);
         exit();
     } catch (PDOException $e) {

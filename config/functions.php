@@ -1,42 +1,8 @@
 <?php
-
-// Функция для получения следующей даты урока
-function getNextLessonDate($pdo) {
-    $today = date('Y-m-d');
-    $stmt = $pdo->prepare('SELECT lesson_date FROM lesson_dates WHERE lesson_date >= ? ORDER BY lesson_date ASC LIMIT 1');
-    $stmt->execute([$today]);
-    $nextLesson = $stmt->fetchColumn();
-
-    if ($nextLesson) {
-        return $nextLesson;
-    } else {
-        // Если нет будущих уроков, вернем текущую дату
-        return $today;
-    }
-}
-
 // Функция для проверки корректности даты
 function validateDate($date, $format = 'Y-m-d') {
     $d = DateTime::createFromFormat($format, $date);
     return $d && $d->format($format) === $date;
-}
-
-// Функция для чтения данных об учениках из базы данных
-function readStudents($pdo) {
-    $stmt = $pdo->query('SELECT s.*, u.id AS user_id, u.nickname FROM students s LEFT JOIN users u ON s.id=u.student_id');
-    return $stmt->fetchAll();
-}
-
-function getLessons($pdo) {
-    $stmt = $pdo->query('SELECT lesson_date, lesson_type FROM lesson_dates');
-    $lessonDatesData = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    $lessons = [];
-    foreach ($lessonDatesData as $lesson) {
-        $lessons[$lesson['lesson_date']] = $lesson['lesson_type'];
-    }
-
-    return $lessons;
 }
 
 // Функция для проверки, авторизован ли пользователь
@@ -59,7 +25,6 @@ function sanitizeString($string) {
     $string = preg_replace('/\s+/', ' ', $string);
     return $string;
 }
-
 
 abstract class BaseOrder {
     protected $students;
@@ -146,10 +111,10 @@ class OrderManager {
     private $students;
     private $lessons;
 
-    public function __construct(private $pdo)
+    public function __construct(private $db)
     {
-        $this->students = readStudents($pdo);
-        $this->lessons = getLessons($pdo);
+        $this->students = $this->db->getStudents();
+        $this->lessons = $this->db->getLessons();
     }
 
     public function getStudents() {
@@ -164,7 +129,7 @@ class OrderManager {
         if (isset($date) && !validateDate($date)) {
             throw new Exception('Некорректная дата');
         }
-        $date = $date ?? getNextLessonDate($this->pdo);
+        $date = $date ?? $this->db->getNextLessonDate();
         
         if(!$type) {
             $type = $this->lessons[$date] ?? null;
@@ -191,8 +156,5 @@ class OrderManager {
             default:
                 throw new Exception('Некорректный тип урока');
         }
-
     }
-
-
 }
